@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import Landing from './pages/Landing';
 import Affiliates from './pages/Affiliates';
 import TaxReports from './pages/TaxReports';
+import Integrations from './pages/Integrations';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -45,6 +46,7 @@ const AuthenticatedApp = () => {
         <Route path="/reports" element={<AIReports />} />
         <Route path="/tax-reports" element={<TaxReports />} />
         <Route path="/affiliates" element={<Affiliates />} />
+        <Route path="/integrations" element={<Integrations />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
