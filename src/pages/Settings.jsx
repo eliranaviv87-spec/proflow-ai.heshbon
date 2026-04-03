@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Save, Building2, Shield } from "lucide-react";
+import ApiKeysSection from "../components/settings/ApiKeysSection";
 
 const inputStyle = {
   background: "rgba(255,255,255,0.04)",
@@ -90,6 +91,9 @@ export default function Settings() {
           {saving ? "שומר..." : saved ? "✓ נשמר!" : "שמור"}
         </button>
       </div>
+
+      {/* API Keys & Integrations */}
+      <ApiKeysSection />
 
       {/* Security Info */}
       <div className="glass-card p-5">
