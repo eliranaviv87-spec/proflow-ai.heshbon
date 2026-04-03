@@ -1,171 +1,158 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { ArrowUpDown, Check, X, Plus } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import moment from "moment";
-import { toast } from "sonner";
+import { Link2, Link2Off, Plus, TrendingUp, TrendingDown } from "lucide-react";
+
+const formatCurrency = (n) =>
+  new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(n || 0);
 
 export default function Banking() {
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [txs, setTxs] = useState([]);
+  const [docs, setDocs] = useState([]);
+  const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ date: "", description: "", amount: "", tx_type: "debit" });
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadTransactions();
-  }, []);
+  const load = async () => {
+    const [t, d] = await Promise.all([
+      base44.entities.BankTransaction.list("-date", 100),
+      base44.entities.Document.list("-created_date", 200),
+    ]);
+    setTxs(t);
+    setDocs(d);
+    setLoading(false);
+  };
 
-  async function loadTransactions() {
-    try {
-      const txs = await base44.entities.BankTransaction.list("-date", 100);
-      setTransactions(txs);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }
+  useEffect(() => { load(); }, []);
 
-  async function handleAddTransaction() {
-    if (!form.date || !form.description || !form.amount) {
-      toast.error("נא למלא את כל השדות");
-      return;
-    }
-    await base44.entities.BankTransaction.create({
+  const handleAdd = async () => {
+    if (!form.date || !form.description || !form.amount) return;
+    const tx = await base44.entities.BankTransaction.create({
       date: form.date,
       description: form.description,
       amount: parseFloat(form.amount),
       tx_type: form.tx_type,
+      match_status: false,
     });
-    toast.success("תנועה נוספה");
+
+    // Auto-match
+    const amount = parseFloat(form.amount);
+    const txDate = new Date(form.date);
+    const match = docs.find((doc) => {
+      if (!doc.date_issued || doc.status === "Archived") return false;
+      const diff = Math.abs(new Date(doc.date_issued) - txDate) / 86400000;
+      return doc.total_amount === amount && diff <= 5;
+    });
+
+    if (match) {
+      await base44.entities.BankTransaction.update(tx.id, { linked_doc_id: match.id, match_status: true });
+      await base44.entities.Document.update(match.id, { status: "Archived" });
+      await base44.entities.AuditLog.create({ action: `התאמה אוטומטית מעסקה: ${tx.id} ← ${match.id}`, entity_type: "BankTransaction", entity_id: tx.id });
+    }
+
     setForm({ date: "", description: "", amount: "", tx_type: "debit" });
-    setDialogOpen(false);
-    loadTransactions();
-  }
+    setShowAdd(false);
+    load();
+  };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const totalCredit = txs.filter(t => t.tx_type === "credit").reduce((s, t) => s + (t.amount || 0), 0);
+  const totalDebit = txs.filter(t => t.tx_type === "debit").reduce((s, t) => s + (t.amount || 0), 0);
+  const matched = txs.filter(t => t.match_status).length;
 
-  const matched = transactions.filter((t) => t.match_status).length;
+  const inputStyle = {
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "10px",
+    color: "#fff",
+    padding: "8px 12px",
+    fontSize: "13px",
+    outline: "none",
+    width: "100%",
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">בנקאות</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {matched} מתוך {transactions.length} תנועות הותאמו אוטומטית
-          </p>
+          <h1 className="text-2xl font-bold text-white mb-1">בנקאות</h1>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>ניהול עסקאות והתאמות אוטומטיות</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20">
-              <Plus className="w-4 h-4" /> הוסף תנועה
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-card border-border">
-            <DialogHeader>
-              <DialogTitle>הוסף תנועת בנק</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-2">
-              <div>
-                <Label>תאריך</Label>
-                <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="bg-secondary/50 border-border/50" />
-              </div>
-              <div>
-                <Label>תיאור</Label>
-                <Input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-secondary/50 border-border/50" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>סכום</Label>
-                  <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className="bg-secondary/50 border-border/50" />
-                </div>
-                <div>
-                  <Label>סוג</Label>
-                  <Select value={form.tx_type} onValueChange={(v) => setForm({ ...form, tx_type: v })}>
-                    <SelectTrigger className="bg-secondary/50 border-border/50">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-card border-border">
-                      <SelectItem value="debit">חיוב</SelectItem>
-                      <SelectItem value="credit">זיכוי</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <Button onClick={handleAddTransaction} className="w-full bg-primary text-primary-foreground">
-                שמור
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <button onClick={() => setShowAdd(!showAdd)} className="btn-cyan px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2" aria-label="הוסף עסקה">
+          <Plus size={14} /> הוסף עסקה
+        </button>
       </div>
 
-      {transactions.length === 0 ? (
-        <div className="glass-card p-12 text-center">
-          <ArrowUpDown className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground">אין עדיין תנועות בנקאיות</p>
-          <p className="text-xs text-muted-foreground/60 mt-1">הוסף תנועות או חבר את חשבון הבנק</p>
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="glass-card p-4 neon-glow-cyan">
+          <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>זיכויים</p>
+          <p className="text-xl font-bold" style={{ color: "#00E5FF" }}>{formatCurrency(totalCredit)}</p>
         </div>
-      ) : (
-        <div className="glass-card overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border/30 hover:bg-transparent">
-                <TableHead className="text-right text-muted-foreground text-xs">תאריך</TableHead>
-                <TableHead className="text-right text-muted-foreground text-xs">תיאור</TableHead>
-                <TableHead className="text-right text-muted-foreground text-xs">סכום</TableHead>
-                <TableHead className="text-right text-muted-foreground text-xs">סוג</TableHead>
-                <TableHead className="text-right text-muted-foreground text-xs">התאמה</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.map((tx) => (
-                <TableRow key={tx.id} className="border-border/20 hover:bg-secondary/20">
-                  <TableCell className="text-sm font-inter text-muted-foreground">
-                    {tx.date ? moment(tx.date).format("DD/MM/YY") : "—"}
-                  </TableCell>
-                  <TableCell className="text-sm">{tx.description}</TableCell>
-                  <TableCell className={`text-sm font-medium font-inter ${tx.tx_type === "credit" ? "text-neon-cyan" : "text-foreground"}`}>
-                    {tx.tx_type === "credit" ? "+" : "-"}₪{Math.abs(tx.amount).toLocaleString("he-IL")}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={tx.tx_type === "credit" ? "bg-neon-cyan/10 text-neon-cyan border-neon-cyan/20" : "bg-secondary text-muted-foreground border-border"}>
-                      {tx.tx_type === "credit" ? "זיכוי" : "חיוב"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {tx.match_status ? (
-                      <Check className="w-4 h-4 text-neon-cyan" />
-                    ) : (
-                      <X className="w-4 h-4 text-muted-foreground/40" />
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <div className="glass-card p-4">
+          <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>חיובים</p>
+          <p className="text-xl font-bold" style={{ color: "#ff6b6b" }}>{formatCurrency(totalDebit)}</p>
+        </div>
+        <div className="glass-card p-4 neon-glow-purple">
+          <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>הותאמו אוטומטית</p>
+          <p className="text-xl font-bold" style={{ color: "#B388FF" }}>{matched} / {txs.length}</p>
+        </div>
+      </div>
+
+      {/* Add Form */}
+      {showAdd && (
+        <div className="glass-card p-5 neon-glow-cyan">
+          <p className="text-sm font-semibold text-white mb-4">הוספת עסקה ידנית</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} style={inputStyle} aria-label="תאריך" />
+            <input type="text" placeholder="תיאור" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} style={inputStyle} aria-label="תיאור" />
+            <input type="number" placeholder="סכום" value={form.amount} onChange={e => setForm({ ...form, amount: e.target.value })} style={inputStyle} aria-label="סכום" />
+            <select value={form.tx_type} onChange={e => setForm({ ...form, tx_type: e.target.value })} style={inputStyle} aria-label="סוג עסקה">
+              <option value="debit">חיוב</option>
+              <option value="credit">זיכוי</option>
+            </select>
+          </div>
+          <button onClick={handleAdd} className="btn-cyan px-5 py-2 rounded-xl text-sm font-medium">שמור</button>
         </div>
       )}
+
+      {/* Transactions List */}
+      <div className="glass-card overflow-hidden">
+        <div className="p-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <p className="text-sm font-semibold text-white">עסקאות</p>
+        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-10">
+            <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(0,229,255,0.2)", borderTopColor: "#00E5FF" }} />
+          </div>
+        ) : txs.length === 0 ? (
+          <div className="text-center py-10" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <p className="text-sm">אין עסקאות עדיין</p>
+          </div>
+        ) : (
+          <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+            {txs.map((tx) => (
+              <div key={tx.id} className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-white hover:bg-opacity-[0.02]">
+                <div className="flex items-center gap-3">
+                  {tx.tx_type === "credit" ? <TrendingUp size={16} style={{ color: "#00E5FF" }} /> : <TrendingDown size={16} style={{ color: "#ff6b6b" }} />}
+                  <div>
+                    <p className="text-sm font-medium text-white">{tx.description}</p>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{tx.date}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <p className="text-sm font-semibold" style={{ color: tx.tx_type === "credit" ? "#00E5FF" : "#ff6b6b" }}>
+                    {tx.tx_type === "credit" ? "+" : "-"}{formatCurrency(tx.amount)}
+                  </p>
+                  {tx.match_status ? (
+                    <span className="flex items-center gap-1 text-xs" style={{ color: "#4ade80" }}><Link2 size={12} /> מותאם</span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-xs" style={{ color: "rgba(255,255,255,0.3)" }}><Link2Off size={12} /> לא מותאם</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

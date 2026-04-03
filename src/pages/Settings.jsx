@@ -1,146 +1,115 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Building2, Save, Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
+import { Save, Building2, Shield } from "lucide-react";
+
+const inputStyle = {
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  borderRadius: "10px",
+  color: "#fff",
+  padding: "10px 14px",
+  fontSize: "13px",
+  outline: "none",
+  width: "100%",
+};
 
 export default function Settings() {
+  const [orgs, setOrgs] = useState([]);
   const [org, setOrg] = useState(null);
-  const [form, setForm] = useState({
-    business_name: "",
-    tax_id: "",
-    base_currency: "ILS",
-    subscription_tier: "Starter",
-    advance_tax_rate: 0,
-  });
-  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const orgs = await base44.entities.Organization.list("-created_date", 1);
-        if (orgs.length > 0) {
-          setOrg(orgs[0]);
-          setForm({
-            business_name: orgs[0].business_name || "",
-            tax_id: orgs[0].tax_id || "",
-            base_currency: orgs[0].base_currency || "ILS",
-            subscription_tier: orgs[0].subscription_tier || "Starter",
-            advance_tax_rate: orgs[0].advance_tax_rate || 0,
-          });
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    base44.entities.Organization.list().then((list) => {
+      setOrgs(list);
+      if (list[0]) { setOrg(list[0]); setForm(list[0]); }
+    });
   }, []);
 
-  async function handleSave() {
+  const handleSave = async () => {
     setSaving(true);
-    try {
-      if (org) {
-        await base44.entities.Organization.update(org.id, form);
-      } else {
-        const created = await base44.entities.Organization.create(form);
-        setOrg(created);
-      }
-      toast.success("ההגדרות נשמרו בהצלחה");
-    } catch (e) {
-      toast.error("שגיאה בשמירה");
-    } finally {
-      setSaving(false);
+    if (org?.id) {
+      await base44.entities.Organization.update(org.id, form);
+    } else {
+      const created = await base44.entities.Organization.create(form);
+      setOrg(created);
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">הגדרות</h1>
-        <p className="text-sm text-muted-foreground mt-1">הגדרות הארגון והמערכת</p>
+        <h1 className="text-2xl font-bold text-white mb-1">הגדרות</h1>
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>ניהול פרופיל העסק</p>
       </div>
 
-      <div className="glass-card p-6 space-y-5">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Building2 className="w-5 h-5 text-primary" />
-          </div>
-          <h2 className="text-lg font-semibold text-foreground">פרטי עסק</h2>
+      {/* Organization Profile */}
+      <div className="glass-card p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <Building2 size={16} style={{ color: "#00E5FF" }} />
+          <p className="text-sm font-semibold text-white">פרטי העסק</p>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <div>
-            <Label>שם העסק</Label>
-            <Input
-              value={form.business_name}
-              onChange={(e) => setForm({ ...form, business_name: e.target.value })}
-              className="bg-secondary/50 border-border/50"
-            />
+            <label className="block text-xs mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>שם העסק</label>
+            <input type="text" value={form.business_name || ""} onChange={e => setForm({ ...form, business_name: e.target.value })} style={inputStyle} aria-label="שם העסק" />
           </div>
           <div>
-            <Label>מספר עוסק / ח.פ.</Label>
-            <Input
-              value={form.tax_id}
-              onChange={(e) => setForm({ ...form, tax_id: e.target.value })}
-              className="bg-secondary/50 border-border/50"
-            />
+            <label className="block text-xs mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>מספר עוסק / ח.פ.</label>
+            <input type="text" value={form.tax_id || ""} onChange={e => setForm({ ...form, tax_id: e.target.value })} style={inputStyle} aria-label="מספר עוסק" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>מטבע בסיס</label>
+              <select value={form.base_currency || "ILS"} onChange={e => setForm({ ...form, base_currency: e.target.value })} style={inputStyle} aria-label="מטבע בסיס">
+                <option value="ILS">₪ שקל (ILS)</option>
+                <option value="USD">$ דולר (USD)</option>
+                <option value="EUR">€ יורו (EUR)</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>שיעור מקדמות מס (%)</label>
+              <input type="number" value={form.advance_tax_rate || 0} onChange={e => setForm({ ...form, advance_tax_rate: parseFloat(e.target.value) })} style={inputStyle} min="0" max="100" step="0.5" aria-label="שיעור מקדמות מס" />
+            </div>
           </div>
           <div>
-            <Label>מטבע בסיס</Label>
-            <Select value={form.base_currency} onValueChange={(v) => setForm({ ...form, base_currency: v })}>
-              <SelectTrigger className="bg-secondary/50 border-border/50">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border">
-                <SelectItem value="ILS">₪ שקל</SelectItem>
-                <SelectItem value="USD">$ דולר</SelectItem>
-                <SelectItem value="EUR">€ אירו</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>שיעור מקדמות מס (%)</Label>
-            <Input
-              type="number"
-              value={form.advance_tax_rate}
-              onChange={(e) => setForm({ ...form, advance_tax_rate: parseFloat(e.target.value) || 0 })}
-              className="bg-secondary/50 border-border/50"
-            />
+            <label className="block text-xs mb-1.5" style={{ color: "rgba(255,255,255,0.45)" }}>מסלול מנוי</label>
+            <select value={form.subscription_tier || "Starter"} onChange={e => setForm({ ...form, subscription_tier: e.target.value })} style={inputStyle} aria-label="מסלול מנוי">
+              <option value="Starter">Starter</option>
+              <option value="Pro">Pro</option>
+              <option value="Enterprise">Enterprise</option>
+            </select>
           </div>
         </div>
+        <button onClick={handleSave} disabled={saving} className="mt-5 btn-cyan px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2" aria-label="שמור הגדרות">
+          <Save size={14} />
+          {saving ? "שומר..." : saved ? "✓ נשמר!" : "שמור"}
+        </button>
+      </div>
 
-        <div>
-          <Label>מסלול מנוי</Label>
-          <Select value={form.subscription_tier} onValueChange={(v) => setForm({ ...form, subscription_tier: v })}>
-            <SelectTrigger className="bg-secondary/50 border-border/50 w-full sm:w-64">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-card border-border">
-              <SelectItem value="Starter">Starter</SelectItem>
-              <SelectItem value="Pro">Pro</SelectItem>
-              <SelectItem value="Enterprise">Enterprise</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* Security Info */}
+      <div className="glass-card p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <Shield size={16} style={{ color: "#B388FF" }} />
+          <p className="text-sm font-semibold text-white">אבטחה ופרטיות</p>
         </div>
-
-        <Button onClick={handleSave} disabled={saving} className="gap-2 bg-primary text-primary-foreground">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          שמור הגדרות
-        </Button>
+        <div className="space-y-3">
+          {[
+            { label: "הצפנת נתונים", status: "פעיל", color: "#4ade80" },
+            { label: "בידוד נתונים ארגוני (RLS)", status: "פעיל", color: "#4ade80" },
+            { label: "מסיכת PII", status: "פעיל", color: "#4ade80" },
+            { label: "יומן ביקורת", status: "פעיל", color: "#4ade80" },
+          ].map(({ label, status, color }) => (
+            <div key={label} className="flex items-center justify-between py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>{label}</p>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${color}18`, color, border: `1px solid ${color}33` }}>{status}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

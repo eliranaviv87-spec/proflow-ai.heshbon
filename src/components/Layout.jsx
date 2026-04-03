@@ -1,0 +1,116 @@
+import { Outlet, Link, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Zap } from "lucide-react";
+
+const navItems = [
+  { path: "/", label: "דשבורד", icon: LayoutDashboard },
+  { path: "/vault", label: "הכספת", icon: Archive },
+  { path: "/banking", label: "בנקאות", icon: Landmark },
+  { path: "/reports", label: "דוחות AI", icon: BarChart3 },
+  { path: "/settings", label: "הגדרות", icon: Settings },
+];
+
+export default function Layout() {
+  const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
+
+  return (
+    <div className="flex h-screen overflow-hidden" style={{ background: "#0A0A0C", direction: "rtl" }}>
+      {/* Sidebar */}
+      <div
+        className="flex flex-col transition-all duration-300 border-l"
+        style={{
+          width: collapsed ? "64px" : "220px",
+          background: "rgba(255,255,255,0.02)",
+          borderColor: "rgba(255,255,255,0.06)",
+          flexShrink: 0,
+        }}
+      >
+        {/* Logo */}
+        <div className="flex items-center gap-3 p-4 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #00E5FF22, #B388FF22)", border: "1px solid rgba(0,229,255,0.3)" }}>
+            <Zap size={16} style={{ color: "#00E5FF" }} />
+          </div>
+          {!collapsed && (
+            <div>
+              <div className="font-bold text-sm text-white">ProFlow AI</div>
+              <div className="text-xs" style={{ color: "#00E5FF" }}>Financial OS</div>
+            </div>
+          )}
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 p-3 space-y-1">
+          {navItems.map(({ path, label, icon: Icon }) => {
+            const active = location.pathname === path;
+            return (
+              <Link
+                key={path}
+                to={path}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group"
+                style={{
+                  background: active ? "rgba(0,229,255,0.08)" : "transparent",
+                  border: active ? "1px solid rgba(0,229,255,0.15)" : "1px solid transparent",
+                  color: active ? "#00E5FF" : "rgba(255,255,255,0.5)",
+                }}
+                aria-label={label}
+              >
+                <Icon size={18} className="flex-shrink-0" />
+                {!collapsed && <span className="text-sm font-medium">{label}</span>}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Collapse Toggle */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-4 flex items-center justify-center transition-colors"
+          style={{ color: "rgba(255,255,255,0.3)" }}
+          aria-label="קפל תפריט"
+        >
+          <ChevronLeft size={16} style={{ transform: collapsed ? "rotate(180deg)" : "none", transition: "transform 0.3s" }} />
+        </button>
+      </div>
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header
+          className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0"
+          style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.06)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full pulse-dot flex-shrink-0" style={{ background: "#00E5FF" }} aria-label="AI פעיל" />
+            <span className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>AI Engine Online</span>
+          </div>
+
+          <div className="flex-1 max-w-md mx-6">
+            <input
+              type="search"
+              placeholder="חפש מסמכים, ספקים, עסקאות..."
+              className="w-full px-4 py-2 rounded-xl text-sm outline-none"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "rgba(255,255,255,0.8)",
+              }}
+              aria-label="חיפוש גלובלי"
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: "rgba(179,136,255,0.2)", color: "#B388FF", border: "1px solid rgba(179,136,255,0.3)" }}>
+              א
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto p-6">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+}
