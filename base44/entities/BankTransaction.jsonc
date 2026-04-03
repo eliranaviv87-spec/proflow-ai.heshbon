@@ -1,0 +1,45 @@
+{
+  "name": "BankTransaction",
+  "type": "object",
+  "properties": {
+    "org_id": {
+      "type": "string",
+      "title": "\u05d0\u05e8\u05d2\u05d5\u05df"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "title": "\u05ea\u05d0\u05e8\u05d9\u05da"
+    },
+    "description": {
+      "type": "string",
+      "title": "\u05ea\u05d9\u05d0\u05d5\u05e8"
+    },
+    "amount": {
+      "type": "number",
+      "title": "\u05e1\u05db\u05d5\u05dd"
+    },
+    "linked_doc_id": {
+      "type": "string",
+      "title": "\u05de\u05e1\u05de\u05da \u05de\u05e7\u05d5\u05e9\u05e8"
+    },
+    "match_status": {
+      "type": "boolean",
+      "default": false,
+      "title": "\u05e1\u05d8\u05d8\u05d5\u05e1 \u05d4\u05ea\u05d0\u05de\u05d4"
+    },
+    "tx_type": {
+      "type": "string",
+      "enum": [
+        "credit",
+        "debit"
+      ],
+      "title": "\u05e1\u05d5\u05d2 \u05ea\u05e0\u05d5\u05e2\u05d4"
+    }
+  },
+  "required": [
+    "date",
+    "description",
+    "amount"
+  ]
+}
