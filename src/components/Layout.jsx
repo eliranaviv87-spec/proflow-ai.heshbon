@@ -1,8 +1,8 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Zap, Users, FileText, Link2, Home, Crown } from "lucide-react";
+import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Zap, Users, FileText, Link2, Home, Crown, BrainCircuit } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
-import NotificationBell from "./NotificationBell";
+import NotificationsBell from "./NotificationsBell";
 
 const userNavItems = [
   { path: "/landing", label: "דף הבית", icon: Home },
@@ -11,6 +11,7 @@ const userNavItems = [
   { path: "/banking", label: "בנקאות", icon: Landmark },
   { path: "/reports", label: "דוחות AI", icon: BarChart3 },
   { path: "/tax-reports", label: "דוחות מס", icon: FileText },
+  { path: "/smart-reports", label: "מנוע דוחות חכם", icon: BrainCircuit },
 ];
 
 const adminNavItems = [
@@ -143,7 +144,7 @@ export default function Layout() {
           </div>
 
           <div className="flex items-center gap-3">
-            <NotificationBell />
+            <NotificationsBell />
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: "rgba(179,136,255,0.2)", color: "#B388FF", border: "1px solid rgba(179,136,255,0.3)" }}>
               {user?.full_name?.[0] || "א"}
             </div>

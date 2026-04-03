@@ -25,10 +25,10 @@
       "type": "string",
       "title": "\u05ea\u05d9\u05d0\u05d5\u05e8"
     },
-    "is_encrypted": {
+    "is_active": {
       "type": "boolean",
       "default": true,
-      "title": "\u05de\u05d5\u05e6\u05e4\u05df"
+      "title": "\u05e4\u05e2\u05d9\u05dc"
     }
   },
   "required": [

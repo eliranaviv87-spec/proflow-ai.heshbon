@@ -18,6 +18,7 @@ import Integrations from './pages/Integrations';
 import AdminPanel from './pages/AdminPanel';
 import Forbidden from './pages/Forbidden';
 import AdminRoute from './components/AdminRoute';
+import SmartReports from './pages/SmartReports';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -52,6 +53,7 @@ const AuthenticatedApp = () => {
         <Route path="/integrations" element={<AdminRoute><Integrations /></AdminRoute>} />
         <Route path="/affiliates" element={<AdminRoute><Affiliates /></AdminRoute>} />
         <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+        <Route path="/smart-reports" element={<SmartReports />} />
         <Route path="/settings" element={<AdminRoute><Settings /></AdminRoute>} />
       </Route>
       <Route path="/403" element={<Forbidden />} />

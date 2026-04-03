@@ -9,11 +9,11 @@
     "type": {
       "type": "string",
       "enum": [
-        "document_processed",
-        "tax_due",
-        "bank_match",
-        "whatsapp_received",
+        "vat_reminder",
+        "tax_deadline",
+        "document_pending",
         "cashflow_alert",
+        "reconciliation",
         "system"
       ],
       "title": "\u05e1\u05d5\u05d2"
@@ -26,29 +26,29 @@
       "type": "string",
       "title": "\u05d4\u05d5\u05d3\u05e2\u05d4"
     },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "critical"
+      ],
+      "default": "info",
+      "title": "\u05d3\u05d7\u05d9\u05e4\u05d5\u05ea"
+    },
     "is_read": {
       "type": "boolean",
       "default": false,
       "title": "\u05e0\u05e7\u05e8\u05d0"
     },
-    "priority": {
+    "action_url": {
       "type": "string",
-      "enum": [
-        "low",
-        "medium",
-        "high",
-        "critical"
-      ],
-      "default": "medium",
-      "title": "\u05e2\u05d3\u05d9\u05e4\u05d5\u05ea"
-    },
-    "link": {
-      "type": "string",
-      "title": "\u05e7\u05d9\u05e9\u05d5\u05e8"
+      "title": "\u05e7\u05d9\u05e9\u05d5\u05e8 \u05dc\u05e4\u05e2\u05d5\u05dc\u05d4"
     }
   },
   "required": [
     "title",
-    "message"
+    "message",
+    "type"
   ]
 }
