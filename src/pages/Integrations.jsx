@@ -1,70 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { MessageCircle, HardDrive, CheckCircle, XCircle, Loader2, ExternalLink, Copy, Check, RefreshCw } from "lucide-react";
+import { MessageCircle, HardDrive, CheckCircle, ExternalLink, Copy, Check, Download, RefreshCw, AlertCircle } from "lucide-react";
 
-const GDRIVE_CONNECTOR_ID = "ProFlow Google Drive";
+const sectionStyle = {
+  background: "rgba(255,255,255,0.03)",
+  border: "1px solid rgba(255,255,255,0.07)",
+  borderRadius: "16px",
+  padding: "24px",
+};
 
 export default function Integrations() {
-  const [user, setUser] = useState(null);
-  const [driveConnected, setDriveConnected] = useState(false);
-  const [driveFiles, setDriveFiles] = useState([]);
-  const [driveLoading, setDriveLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
   const [webhookCopied, setWebhookCopied] = useState(false);
-  const [org, setOrg] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState(null);
 
   const webhookUrl = `https://app.base44.com/api/functions/whatsappWebhook`;
-
-  useEffect(() => {
-    async function init() {
-      const me = await base44.auth.me();
-      setUser(me);
-      const orgs = await base44.entities.Organization.list("-created_date", 1);
-      if (orgs[0]) setOrg(orgs[0]);
-      await checkDriveConnection();
-    }
-    init();
-  }, []);
-
-  const checkDriveConnection = async () => {
-    setDriveLoading(true);
-    try {
-      const res = await base44.functions.invoke("listDriveFiles", {});
-      setDriveFiles(res.data?.files || []);
-      setDriveConnected(true);
-    } catch {
-      setDriveConnected(false);
-    }
-    setDriveLoading(false);
-  };
-
-  const connectDrive = async () => {
-    const url = await base44.connectors.connectAppUser(GDRIVE_CONNECTOR_ID);
-    const popup = window.open(url, "_blank");
-    const timer = setInterval(() => {
-      if (!popup || popup.closed) {
-        clearInterval(timer);
-        checkDriveConnection();
-      }
-    }, 500);
-  };
-
-  const disconnectDrive = async () => {
-    await base44.connectors.disconnectAppUser(GDRIVE_CONNECTOR_ID);
-    setDriveConnected(false);
-    setDriveFiles([]);
-  };
-
-  const syncDocsToDrive = async () => {
-    setSyncing(true);
-    try {
-      await base44.functions.invoke("syncDocsToDrive", {});
-    } catch (e) {
-      console.error(e);
-    }
-    setSyncing(false);
-    await checkDriveConnection();
-  };
 
   const copyWebhook = () => {
     navigator.clipboard.writeText(webhookUrl);
@@ -72,7 +22,38 @@ export default function Integrations() {
     setTimeout(() => setWebhookCopied(false), 2000);
   };
 
-  const sectionStyle = { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "16px", padding: "24px" };
+  const exportToDrive = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const docs = await base44.entities.Document.list("-created_date", 100);
+      const csv = [
+        ["ספק", "מספר מסמך", "תאריך", "סכום", "מע\"מ", "קטגוריה", "סטטוס", "קובץ"].join(","),
+        ...docs.map(d => [
+          d.supplier_name || "",
+          d.doc_number || "",
+          d.date_issued || "",
+          d.total_amount || 0,
+          d.vat_amount || 0,
+          d.ai_category || "",
+          d.status || "",
+          d.file_url || "",
+        ].map(v => `"${v}"`).join(","))
+      ].join("\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ProFlow_Documents_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setSyncResult({ type: "success", msg: `יוצאו ${docs.length} מסמכים בהצלחה` });
+    } catch (e) {
+      setSyncResult({ type: "error", msg: "שגיאה ביצוא" });
+    }
+    setSyncing(false);
+  };
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -81,84 +62,49 @@ export default function Integrations() {
         <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>חבר את השירותים שלך לסינכרון אוטומטי מלא</p>
       </div>
 
-      {/* Google Drive */}
+      {/* Google Drive / Export */}
       <div style={sectionStyle}>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(66,133,244,0.15)" }}>
-              <HardDrive size={20} style={{ color: "#4285F4" }} />
-            </div>
-            <div>
-              <p className="font-semibold text-white">Google Drive</p>
-              <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>שמור חשבוניות אוטומטית ב-Drive שלך</p>
-            </div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(66,133,244,0.15)" }}>
+            <HardDrive size={20} style={{ color: "#4285F4" }} />
           </div>
-          {driveLoading ? (
-            <Loader2 size={18} className="animate-spin" style={{ color: "rgba(255,255,255,0.3)" }} />
-          ) : driveConnected ? (
-            <div className="flex items-center gap-2">
-              <CheckCircle size={16} style={{ color: "#4ade80" }} />
-              <span className="text-xs" style={{ color: "#4ade80" }}>מחובר</span>
-            </div>
-          ) : (
-            <XCircle size={16} style={{ color: "rgba(255,255,255,0.3)" }} />
-          )}
+          <div>
+            <p className="font-semibold text-white">Google Drive — ייצוא מסמכים</p>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>הורד את כל המסמכים שלך כ-CSV לשמירה ב-Drive</p>
+          </div>
         </div>
 
-        {!driveConnected ? (
-          <div>
-            <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
-              חבר את חשבון Google Drive שלך כדי לשמור את כל החשבוניות והמסמכים הפיננסיים אוטומטית בענן.
-            </p>
-            <button
-              onClick={connectDrive}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
-              style={{ background: "rgba(66,133,244,0.15)", color: "#4285F4", border: "1px solid rgba(66,133,244,0.3)" }}
-              aria-label="חבר Google Drive"
-            >
-              <HardDrive size={16} /> חבר את Google Drive שלך
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={syncDocsToDrive}
-                disabled={syncing}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all"
-                style={{ background: "rgba(0,229,255,0.1)", color: "#00E5FF", border: "1px solid rgba(0,229,255,0.25)" }}
-                aria-label="סנכרן מסמכים ל-Drive"
-              >
-                <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
-                {syncing ? "מסנכרן..." : "סנכרן כל המסמכים"}
-              </button>
-              <button
-                onClick={disconnectDrive}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
-                style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.4)", border: "1px solid rgba(255,255,255,0.08)" }}
-                aria-label="נתק Google Drive"
-              >
-                נתק
-              </button>
-            </div>
-            {driveFiles.length > 0 && (
-              <div>
-                <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>קבצים אחרונים ב-Drive:</p>
-                <div className="space-y-1">
-                  {driveFiles.slice(0, 5).map((f) => (
-                    <div key={f.id} className="flex items-center gap-2 text-xs py-1.5 px-3 rounded-lg" style={{ background: "rgba(255,255,255,0.03)" }}>
-                      <CheckCircle size={12} style={{ color: "#4ade80" }} />
-                      <span className="text-white truncate">{f.name}</span>
-                      <a href={f.webViewLink} target="_blank" rel="noopener noreferrer" className="mr-auto" style={{ color: "rgba(255,255,255,0.3)" }} aria-label="פתח בDrive">
-                        <ExternalLink size={12} />
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+        <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
+          ייצא את כל החשבוניות והמסמכים הפיננסיים לקובץ CSV, ואז גרור אותו ל-Google Drive שלך. הקובץ כולל את כל הנתונים שחילץ ה-AI.
+        </p>
+
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={exportToDrive}
+            disabled={syncing}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+            style={{ background: "rgba(66,133,244,0.15)", color: "#4285F4", border: "1px solid rgba(66,133,244,0.3)" }}
+            aria-label="ייצא מסמכים ל-CSV"
+          >
+            {syncing ? <RefreshCw size={14} className="animate-spin" /> : <Download size={14} />}
+            {syncing ? "מייצא..." : "ייצא מסמכים ל-CSV"}
+          </button>
+        </div>
+
+        {syncResult && (
+          <div className="flex items-center gap-2 text-sm px-3 py-2 rounded-xl" style={{
+            background: syncResult.type === "success" ? "rgba(74,222,128,0.08)" : "rgba(255,107,107,0.08)",
+            border: `1px solid ${syncResult.type === "success" ? "rgba(74,222,128,0.2)" : "rgba(255,107,107,0.2)"}`,
+            color: syncResult.type === "success" ? "#4ade80" : "#ff6b6b",
+          }}>
+            {syncResult.type === "success" ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
+            {syncResult.msg}
           </div>
         )}
+
+        <div className="mt-4 p-3 rounded-xl text-xs" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)" }}>
+          <strong style={{ color: "rgba(255,255,255,0.6)" }}>איך לשמור ב-Drive:</strong> לחץ ייצא → הורד CSV → גרור ל-Google Drive שלך. הקובץ כולל את כל נתוני החשבוניות.
+        </div>
       </div>
 
       {/* WhatsApp */}
@@ -174,23 +120,32 @@ export default function Integrations() {
         </div>
 
         <div className="p-4 rounded-xl mb-4" style={{ background: "rgba(37,211,102,0.05)", border: "1px solid rgba(37,211,102,0.15)" }}>
-          <p className="text-sm font-medium mb-2" style={{ color: "#25D366" }}>איך מחברים?</p>
+          <p className="text-sm font-medium mb-3" style={{ color: "#25D366" }}>איך מחברים? (3 צעדים)</p>
           <ol className="space-y-2 text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>
-            <li className="flex gap-2"><span style={{ color: "#25D366" }}>1.</span> פתח חשבון ב-<strong>WhatsApp Business API</strong> (Twilio / 360Dialog / Meta)</li>
-            <li className="flex gap-2"><span style={{ color: "#25D366" }}>2.</span> הגדר Webhook לכתובת למטה</li>
-            <li className="flex gap-2"><span style={{ color: "#25D366" }}>3.</span> שלח תמונת חשבונית — AI יחלץ ויעדכן אוטומטית</li>
+            <li className="flex gap-2 items-start">
+              <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 font-bold mt-0.5" style={{ background: "rgba(37,211,102,0.2)", color: "#25D366" }}>1</span>
+              פתח חשבון ב-<a href="https://www.twilio.com/whatsapp" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "#25D366" }}>Twilio WhatsApp</a> או <a href="https://www.360dialog.com" target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "#25D366" }}>360Dialog</a>
+            </li>
+            <li className="flex gap-2 items-start">
+              <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 font-bold mt-0.5" style={{ background: "rgba(37,211,102,0.2)", color: "#25D366" }}>2</span>
+              הגדר Webhook לכתובת למטה בהגדרות חשבונך
+            </li>
+            <li className="flex gap-2 items-start">
+              <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 font-bold mt-0.5" style={{ background: "rgba(37,211,102,0.2)", color: "#25D366" }}>3</span>
+              שלח תמונת חשבונית — AI יחלץ ויעדכן אוטומטית + תשלח תגובה בחזרה
+            </li>
           </ol>
         </div>
 
         <div>
-          <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>כתובת Webhook שלך:</p>
+          <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>כתובת ה-Webhook שלך (הדבק ב-Twilio/360Dialog):</p>
           <div className="flex items-center gap-2">
-            <code className="flex-1 text-xs px-3 py-2.5 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#25D366" }}>
+            <code className="flex-1 text-xs px-3 py-2.5 rounded-xl truncate" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#25D366" }}>
               {webhookUrl}
             </code>
             <button
               onClick={copyWebhook}
-              className="px-3 py-2.5 rounded-xl transition-all"
+              className="px-3 py-2.5 rounded-xl transition-all flex-shrink-0"
               style={{ background: "rgba(37,211,102,0.1)", color: "#25D366", border: "1px solid rgba(37,211,102,0.2)" }}
               aria-label="העתק כתובת webhook"
             >
@@ -200,11 +155,12 @@ export default function Integrations() {
         </div>
 
         <div className="mt-4 p-3 rounded-xl text-xs" style={{ background: "rgba(255,171,0,0.05)", border: "1px solid rgba(255,171,0,0.15)", color: "rgba(255,255,255,0.5)" }}>
-          <strong style={{ color: "#FFAB00" }}>תגובה אוטומטית:</strong> "קלטתי! הוצאה של [סכום] מ-[ספק] עודכנה בדשבורד ✅"
+          <strong style={{ color: "#FFAB00" }}>תגובה אוטומטית שתשלח בחזרה:</strong><br />
+          "✅ קלטתי! הוצאה של ₪[סכום] מ-[ספק] עודכנה בדאשבורד."
         </div>
       </div>
 
-      {/* Tax Export */}
+      {/* Tax Authorities */}
       <div style={sectionStyle}>
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,171,0,0.15)" }}>
@@ -212,13 +168,13 @@ export default function Integrations() {
           </div>
           <div>
             <p className="font-semibold text-white">רשות המסים — PCN874</p>
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>ייצוא ושליחה ישירה לרשויות</p>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>ייצוא ושליחה ישירה לרשויות המס</p>
           </div>
         </div>
         <p className="text-sm mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>
-          המערכת מייצרת קבצי PCN874 תואמים לרשות המסים. עבור ל<strong style={{ color: "#FFAB00" }}> דוחות מס</strong> להורדה ושליחה.
+          המערכת מייצרת קבצי PCN874 תואמים לרשות המסים ישראל. עבור ל<strong style={{ color: "#FFAB00" }}> דוחות מס</strong> להורדה ושליחה ישירה.
         </p>
-        <a href="/tax-reports" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium" style={{ background: "rgba(255,171,0,0.1)", color: "#FFAB00", border: "1px solid rgba(255,171,0,0.2)" }}>
+        <a href="/tax-reports" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all" style={{ background: "rgba(255,171,0,0.1)", color: "#FFAB00", border: "1px solid rgba(255,171,0,0.2)" }}>
           עבור לדוחות מס <ExternalLink size={14} />
         </a>
       </div>
