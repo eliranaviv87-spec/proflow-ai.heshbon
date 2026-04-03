@@ -20,6 +20,7 @@ import Forbidden from './pages/Forbidden';
 import AdminRoute from './components/AdminRoute';
 import SmartReports from './pages/SmartReports';
 import WhatsAppConnect from './pages/WhatsAppConnect';
+import TaxAuthorityHub from './pages/TaxAuthorityHub';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -56,6 +57,7 @@ const AuthenticatedApp = () => {
         <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
         <Route path="/smart-reports" element={<SmartReports />} />
         <Route path="/whatsapp" element={<WhatsAppConnect />} />
+        <Route path="/tax-authority" element={<TaxAuthorityHub />} />
         <Route path="/settings" element={<AdminRoute><Settings /></AdminRoute>} />
       </Route>
       <Route path="/403" element={<Forbidden />} />

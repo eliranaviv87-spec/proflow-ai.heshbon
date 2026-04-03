@@ -1,0 +1,60 @@
+{
+  "name": "SupportTicket",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "title": "\u05d0\u05d9\u05de\u05d9\u05d9\u05dc \u05de\u05e9\u05ea\u05de\u05e9"
+    },
+    "user_name": {
+      "type": "string",
+      "title": "\u05e9\u05dd \u05de\u05e9\u05ea\u05de\u05e9"
+    },
+    "subject": {
+      "type": "string",
+      "title": "\u05e0\u05d5\u05e9\u05d0"
+    },
+    "message": {
+      "type": "string",
+      "title": "\u05d4\u05d5\u05d3\u05e2\u05d4"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Open",
+        "In_Progress",
+        "Resolved",
+        "Closed"
+      ],
+      "default": "Open",
+      "title": "\u05e1\u05d8\u05d8\u05d5\u05e1"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Medium",
+        "High",
+        "Critical"
+      ],
+      "default": "Medium",
+      "title": "\u05e2\u05d3\u05d9\u05e4\u05d5\u05ea"
+    },
+    "admin_reply": {
+      "type": "string",
+      "title": "\u05ea\u05d2\u05d5\u05d1\u05ea \u05d0\u05d3\u05de\u05d9\u05df"
+    },
+    "sla_deadline": {
+      "type": "string",
+      "format": "date-time",
+      "title": "\u05d3\u05d3\u05dc\u05d9\u05d9\u05df SLA (48 \u05e9\u05e2\u05d5\u05ea)"
+    },
+    "chat_history": {
+      "type": "string",
+      "title": "\u05d4\u05d9\u05e1\u05d8\u05d5\u05e8\u05d9\u05d9\u05ea \u05e9\u05d9\u05d7\u05d4 (JSON)"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}
