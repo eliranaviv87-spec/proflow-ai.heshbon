@@ -15,6 +15,9 @@ import Landing from './pages/Landing';
 import Affiliates from './pages/Affiliates';
 import TaxReports from './pages/TaxReports';
 import Integrations from './pages/Integrations';
+import AdminPanel from './pages/AdminPanel';
+import Forbidden from './pages/Forbidden';
+import AdminRoute from './components/AdminRoute';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -45,10 +48,13 @@ const AuthenticatedApp = () => {
         <Route path="/banking" element={<Banking />} />
         <Route path="/reports" element={<AIReports />} />
         <Route path="/tax-reports" element={<TaxReports />} />
-        <Route path="/affiliates" element={<Affiliates />} />
-        <Route path="/integrations" element={<Integrations />} />
-        <Route path="/settings" element={<Settings />} />
+  
+        <Route path="/integrations" element={<AdminRoute><Integrations /></AdminRoute>} />
+        <Route path="/affiliates" element={<AdminRoute><Affiliates /></AdminRoute>} />
+        <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+        <Route path="/settings" element={<AdminRoute><Settings /></AdminRoute>} />
       </Route>
+      <Route path="/403" element={<Forbidden />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

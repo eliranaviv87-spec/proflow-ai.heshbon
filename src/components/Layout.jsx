@@ -1,21 +1,29 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Zap, Users, FileText, Link2 } from "lucide-react";
+import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Zap, Users, FileText, Link2, Home, Crown, ShieldAlert } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
 
-const navItems = [
+const userNavItems = [
+  { path: "/landing", label: "דף הבית", icon: Home },
   { path: "/", label: "דשבורד", icon: LayoutDashboard },
-  { path: "/vault", label: "הכספת", icon: Archive },
+  { path: "/vault", label: "מרכז מסמכים", icon: Archive },
   { path: "/banking", label: "בנקאות", icon: Landmark },
   { path: "/reports", label: "דוחות AI", icon: BarChart3 },
   { path: "/tax-reports", label: "דוחות מס", icon: FileText },
+];
+
+const adminNavItems = [
+  { path: "/admin", label: "ניהול מערכת", icon: Crown },
+  { path: "/affiliates", label: "ניהול שגרירים", icon: Users },
   { path: "/integrations", label: "אינטגרציות", icon: Link2 },
-  { path: "/affiliates", label: "שגרירים", icon: Users },
-  { path: "/settings", label: "הגדרות", icon: Settings },
+  { path: "/settings", label: "הגדרות גלובליות", icon: Settings },
 ];
 
 export default function Layout() {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "#0A0A0C", direction: "rtl" }}>
@@ -43,14 +51,14 @@ export default function Layout() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 p-3 space-y-1">
-          {navItems.map(({ path, label, icon: Icon }) => {
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          {userNavItems.map(({ path, label, icon: Icon }) => {
             const active = location.pathname === path;
             return (
               <Link
                 key={path}
                 to={path}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
                 style={{
                   background: active ? "rgba(0,229,255,0.08)" : "transparent",
                   border: active ? "1px solid rgba(0,229,255,0.15)" : "1px solid transparent",
@@ -63,6 +71,37 @@ export default function Layout() {
               </Link>
             );
           })}
+
+          {isAdmin && (
+            <>
+              {!collapsed && (
+                <div className="flex items-center gap-2 px-3 pt-4 pb-1">
+                  <div className="h-px flex-1" style={{ background: "rgba(255,171,0,0.2)" }} />
+                  <span className="text-xs font-semibold" style={{ color: "rgba(255,171,0,0.6)" }}>ADMIN</span>
+                  <div className="h-px flex-1" style={{ background: "rgba(255,171,0,0.2)" }} />
+                </div>
+              )}
+              {adminNavItems.map(({ path, label, icon: Icon }) => {
+                const active = location.pathname === path || location.pathname.startsWith(path + "/");
+                return (
+                  <Link
+                    key={path}
+                    to={path}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
+                    style={{
+                      background: active ? "rgba(255,171,0,0.08)" : "transparent",
+                      border: active ? "1px solid rgba(255,171,0,0.2)" : "1px solid transparent",
+                      color: active ? "#FFAB00" : "rgba(255,255,255,0.35)",
+                    }}
+                    aria-label={label}
+                  >
+                    <Icon size={18} className="flex-shrink-0" />
+                    {!collapsed && <span className="text-sm font-medium">{label}</span>}
+                  </Link>
+                );
+              })}
+            </>
+          )}
         </nav>
 
         {/* Collapse Toggle */}
