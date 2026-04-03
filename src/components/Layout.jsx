@@ -1,12 +1,14 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Zap } from "lucide-react";
+import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Zap, Users, FileText } from "lucide-react";
 
 const navItems = [
   { path: "/", label: "דשבורד", icon: LayoutDashboard },
   { path: "/vault", label: "הכספת", icon: Archive },
   { path: "/banking", label: "בנקאות", icon: Landmark },
   { path: "/reports", label: "דוחות AI", icon: BarChart3 },
+  { path: "/tax-reports", label: "דוחות מס", icon: FileText },
+  { path: "/affiliates", label: "שגרירים", icon: Users },
   { path: "/settings", label: "הגדרות", icon: Settings },
 ];
 

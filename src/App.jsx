@@ -11,6 +11,9 @@ import Vault from './pages/Vault';
 import Banking from './pages/Banking';
 import AIReports from './pages/AIReports';
 import Settings from './pages/Settings';
+import Landing from './pages/Landing';
+import Affiliates from './pages/Affiliates';
+import TaxReports from './pages/TaxReports';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -34,11 +37,14 @@ const AuthenticatedApp = () => {
 
   return (
     <Routes>
+      <Route path="/landing" element={<Landing />} />
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/vault" element={<Vault />} />
         <Route path="/banking" element={<Banking />} />
         <Route path="/reports" element={<AIReports />} />
+        <Route path="/tax-reports" element={<TaxReports />} />
+        <Route path="/affiliates" element={<Affiliates />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
