@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Zap, Users, FileText, Link2, Home, Crown, BrainCircuit } from "lucide-react";
+import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Zap, Users, FileText, Link2, Home, Crown, BrainCircuit, MessageCircle } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import NotificationsBell from "./NotificationsBell";
 
@@ -12,6 +12,7 @@ const userNavItems = [
   { path: "/reports", label: "דוחות AI", icon: BarChart3 },
   { path: "/tax-reports", label: "דוחות מס", icon: FileText },
   { path: "/smart-reports", label: "מנוע דוחות חכם", icon: BrainCircuit },
+  { path: "/whatsapp", label: "חיבור WhatsApp", icon: MessageCircle },
 ];
 
 const adminNavItems = [

@@ -1,0 +1,36 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "default": "user",
+      "title": "\u05ea\u05e4\u05e7\u05d9\u05d3"
+    },
+    "whatsapp_status": {
+      "type": "string",
+      "enum": [
+        "Connected",
+        "Disconnected"
+      ],
+      "default": "Disconnected",
+      "title": "\u05e1\u05d8\u05d8\u05d5\u05e1 WhatsApp"
+    },
+    "whatsapp_instance_id": {
+      "type": "string",
+      "title": "GreenAPI Instance ID"
+    },
+    "whatsapp_api_token": {
+      "type": "string",
+      "title": "GreenAPI API Token"
+    },
+    "whatsapp_phone": {
+      "type": "string",
+      "title": "\u05de\u05e1\u05e4\u05e8 WhatsApp"
+    }
+  }
+}
