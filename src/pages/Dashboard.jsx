@@ -4,6 +4,7 @@ import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Clock, Sparkles, 
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import AIAdviceModal from "../components/AIAdviceModal";
 import AiSmartSummary from "../components/AiSmartSummary";
+import TaxPredictorWidget from "../components/TaxPredictorWidget";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(n || 0);
@@ -86,6 +87,14 @@ export default function Dashboard() {
         <StatCard title='חסכון מע"מ' value={formatCurrency(savings)} sub="ניכוי מס תשומות" color="#B388FF" glow="neon-glow-purple" icon={Sparkles} />
       </div>
 
+      {/* Tax Predictor AI Widget */}
+      <TaxPredictorWidget
+        totalIncome={totalIncome}
+        totalExpenses={totalExpenses}
+        vatOwed={vatOwed}
+        incomeTax={incomeTax}
+      />
+
       {/* Tax Widget + Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Tax Clock */}
@@ -101,11 +110,7 @@ export default function Dashboard() {
               <p className="text-2xl font-bold" style={{ color: "#ff6b6b" }}>{formatCurrency(incomeTax)}</p>
             </div>
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="w-full btn-amber rounded-xl py-2.5 text-sm font-semibold"
-            aria-label="פתח ייעוץ מס AI"
-          >
+          <button onClick={() => setShowModal(true)} className="w-full btn-amber rounded-xl py-2.5 text-sm font-semibold">
             ⚡ אופטימיזציית מס עכשיו
           </button>
         </div>
@@ -121,10 +126,7 @@ export default function Dashboard() {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="day" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.35)" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.35)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `₪${(v / 1000).toFixed(0)}K`} />
-              <Tooltip
-                contentStyle={{ background: "#111114", border: "1px solid rgba(0,229,255,0.2)", borderRadius: "10px", color: "#fff", fontSize: "12px" }}
-                formatter={(v) => [formatCurrency(v), "יתרה"]}
-              />
+              <Tooltip contentStyle={{ background: "#111114", border: "1px solid rgba(0,229,255,0.2)", borderRadius: "10px", color: "#fff", fontSize: "12px" }} formatter={(v) => [formatCurrency(v), "יתרה"]} />
               <Line type="monotone" dataKey="balance" stroke="#00E5FF" strokeWidth={2} dot={false} style={{ filter: "drop-shadow(0 0 6px #00E5FF)" }} />
             </LineChart>
           </ResponsiveContainer>

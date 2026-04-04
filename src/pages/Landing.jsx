@@ -64,7 +64,8 @@ export default function Landing() {
             <span style={{ fontWeight: 900, fontSize: 20 }}>ProFlow<span style={{ color: "#00E5FF" }}>AI</span></span>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-            <a href="/ambassador-program" style={{ color: "rgba(212,175,55,0.85)", fontSize: 13, textDecoration: "none", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(212,175,55,0.2)", background: "rgba(212,175,55,0.06)" }}>🔥 תוכנית שגרירים</a>
+            <a href="/pricing" style={{ color: "rgba(0,229,255,0.8)", fontSize: 13, textDecoration: "none", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,229,255,0.2)", background: "rgba(0,229,255,0.06)" }}>💰 מחירים</a>
+            <a href="/ambassador-program" style={{ color: "rgba(212,175,55,0.85)", fontSize: 13, textDecoration: "none", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(212,175,55,0.2)", background: "rgba(212,175,55,0.06)" }}>🔥 סיירת שגרירים</a>
             <Link to="/" style={{ background: "linear-gradient(135deg, #D4AF37, #00E5FF)", color: "#0A0A0A", padding: "9px 22px", borderRadius: 12, fontSize: 14, fontWeight: 800, textDecoration: "none" }}>
               כניסה למערכת
             </Link>

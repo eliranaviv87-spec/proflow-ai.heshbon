@@ -57,6 +57,15 @@ export default function AmbassadorDashboard() {
   };
 
   const isElite = ambassador?.track === "elite";
+  const totalReferrals = ambassador?.total_referrals || 0;
+  const rank = totalReferrals >= 50 ? "The Legend" : totalReferrals >= 20 ? "Silver" : "Bronze";
+  const rankConfig = {
+    "Bronze": { color: "#cd7f32", label: "Bronze Partner", emoji: "🥉", nextAt: 20, nextLabel: "Silver" },
+    "Silver": { color: "#C0C0C0", label: "Silver Partner", emoji: "🥈", nextAt: 50, nextLabel: "The Legend" },
+    "The Legend": { color: "#D4AF37", label: "The Legend 👑", emoji: "🏆", nextAt: null },
+  };
+  const rc = rankConfig[rank];
+  const isLegend = rank === "The Legend";
   const canRequestPayout = (ambassador?.total_earnings || 0) >= 500 && (ambassador?.pending_payout || 0) > 0;
 
   if (loading) return (
@@ -89,6 +98,9 @@ export default function AmbassadorDashboard() {
             <span style={{ fontSize: 12, padding: "3px 10px", borderRadius: 50, background: isElite ? "rgba(212,175,55,0.15)" : "rgba(0,229,255,0.1)", color: isElite ? "#D4AF37" : "#00E5FF", border: `1px solid ${isElite ? "rgba(212,175,55,0.3)" : "rgba(0,229,255,0.2)"}`, fontWeight: 700 }}>
               {isElite ? "⭐ Elite" : "Casual Partner"}
             </span>
+            <span style={{ fontSize: 12, padding: "3px 10px", borderRadius: 50, background: `${rc.color}18`, color: rc.color, border: `1px solid ${rc.color}40`, fontWeight: 700 }}>
+              {rc.emoji} {rc.label}
+            </span>
           </div>
           <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>
             עמלה: <strong style={{ color: isElite ? "#D4AF37" : "#00E5FF" }}>{isElite ? "50% חוזרת לכל חיים" : "40% חד-פעמית"}</strong>
@@ -115,6 +127,34 @@ export default function AmbassadorDashboard() {
           </button>
         </div>
         <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 8 }}>קוד הפנייה: <code style={{ color: "#D4AF37" }}>{ambassador.ref_code}</code></p>
+      </div>
+
+      {/* Rank Progress Bar */}
+      <div style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${rc.color}25`, borderRadius: 16, padding: "18px 20px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 22 }}>{rc.emoji}</span>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 800, color: rc.color }}>{rc.label}</p>
+              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{totalReferrals} הפניות</p>
+            </div>
+          </div>
+          {isLegend ? (
+            <div style={{ fontSize: 12, padding: "4px 12px", borderRadius: 50, background: "rgba(212,175,55,0.15)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.3)", fontWeight: 700 }}>👑 דרגה מקסימלית</div>
+          ) : (
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>עד {rc.nextLabel}: {rc.nextAt - totalReferrals} הפניות נוספות</span>
+          )}
+        </div>
+        {!isLegend && (
+          <div style={{ height: 6, borderRadius: 6, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+            <div style={{ height: "100%", borderRadius: 6, background: `linear-gradient(90deg, ${rc.color}, ${rc.color}80)`, width: `${Math.min(100, (totalReferrals / rc.nextAt) * 100)}%`, transition: "width 0.6s ease" }} />
+          </div>
+        )}
+        {isLegend && ambassador?.company_funded_ads && (
+          <div style={{ marginTop: 10, padding: "8px 12px", background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)", borderRadius: 10, fontSize: 12, color: "rgba(212,175,55,0.85)" }}>
+            🎯 <strong>קמפיינים ממומנים על ידי החברה</strong> — פעיל. ProFlow AI מממנת פרסום בשמך.
+          </div>
+        )}
       </div>
 
       {/* KPI Cards */}
@@ -230,8 +270,26 @@ export default function AmbassadorDashboard() {
         </div>
       )}
 
+      {/* Legend Badge Section */}
+      {isLegend && (
+        <div style={{ padding: "20px 24px", borderRadius: 18, background: "linear-gradient(135deg, rgba(212,175,55,0.1), rgba(0,229,255,0.05))", border: "1px solid rgba(212,175,55,0.3)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <span style={{ fontSize: 28 }}>🏆</span>
+            <div>
+              <p style={{ fontSize: 16, fontWeight: 900, color: "#D4AF37" }}>The Legend — דרגת העלית</p>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>50+ הפניות פעילות — הצטרפת לסיירת הנבחרים</p>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
+            {["✅ עמלה 50% חוזרת לכל חיים", "✅ קמפיינים ממומנים ע\"י החברה", "✅ מנהל חשבון ייעודי", "✅ גישה ל-API מתקדם"].map(b => (
+              <div key={b} style={{ fontSize: 12, color: "rgba(212,175,55,0.85)", padding: "8px 12px", background: "rgba(212,175,55,0.06)", borderRadius: 10, border: "1px solid rgba(212,175,55,0.15)" }}>{b}</div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Elite Warning */}
-      {isElite && ambassador.status === "active" && (
+      {isElite && !isLegend && ambassador.status === "active" && (
         <div style={{ padding: "12px 16px", borderRadius: 12, background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.2)", fontSize: 12, color: "rgba(212,175,55,0.7)" }}>
           ⚠️ כשגריר Elite — עמלות יוקפאו אם מנוי ה-299 ₪ שלך נכשל. ודא שפרטי התשלום שלך מעודכנים.
         </div>

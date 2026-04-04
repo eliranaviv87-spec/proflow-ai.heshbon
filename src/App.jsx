@@ -25,6 +25,10 @@ import TaxAuthorityHub from './pages/TaxAuthorityHub';
 import AmbassadorDashboard from './pages/AmbassadorDashboard';
 import BusinessCustomerTOS from './pages/BusinessCustomerTOS';
 import AmbassadorEliteContract from './pages/AmbassadorEliteContract';
+import Pricing from './pages/Pricing';
+import AICreditStore from './pages/AICreditStore';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -68,6 +72,10 @@ const AuthenticatedApp = () => {
       <Route path="/ambassador-dashboard" element={<AmbassadorDashboard />} />
       <Route path="/tos-business" element={<BusinessCustomerTOS />} />
       <Route path="/tos-ambassador" element={<AmbassadorEliteContract />} />
+      <Route path="/pricing" element={<Pricing />} />
+      <Route path="/ai-credits" element={<AICreditStore />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
       <Route path="/403" element={<Forbidden />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
