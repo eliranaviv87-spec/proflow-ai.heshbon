@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Zap, Users, FileText, Link2, Home, Crown, BrainCircuit, MessageCircle, Building2 } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import NotificationsBell from "./NotificationsBell";
+import AdminFloatingPanel from "./AdminFloatingPanel";
 import SupportChatWidget from "./SupportChatWidget";
 
 const userNavItems = [
@@ -213,6 +214,7 @@ export default function Layout() {
         </nav>
       )}
 
+      <AdminFloatingPanel />
       <SupportChatWidget />
     </div>
   );
