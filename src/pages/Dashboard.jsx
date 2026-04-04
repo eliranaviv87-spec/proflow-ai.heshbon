@@ -148,8 +148,15 @@ export default function Dashboard() {
             <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(0,229,255,0.2)", borderTopColor: "#00E5FF" }} />
           </div>
         ) : docs.length === 0 ? (
-          <div className="text-center py-10" style={{ color: "rgba(255,255,255,0.3)" }}>
-            <p className="text-sm">אין מסמכים עדיין</p>
+          <div className="text-center py-16">
+            <div style={{ width: 64, height: 64, borderRadius: 20, background: "rgba(0,229,255,0.08)", border: "1px solid rgba(0,229,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+              <TrendingUp size={28} style={{ color: "#00E5FF" }} />
+            </div>
+            <p className="text-lg font-bold text-white mb-2">אין מסמכים עדיין</p>
+            <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>העלה את החשבונית הראשונה שלך ותתחיל לנהל את הכספים בצורה חכמה</p>
+            <a href="/vault" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg, #D4AF37, #00E5FF)", color: "#0A0A0A", padding: "14px 32px", borderRadius: 14, fontWeight: 900, fontSize: 15, textDecoration: "none" }}>
+              ⬆️ העלה את החשבונית הראשונה שלך עכשיו
+            </a>
           </div>
         ) : (
           <div className="space-y-2">

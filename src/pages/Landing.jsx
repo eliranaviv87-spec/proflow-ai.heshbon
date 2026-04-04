@@ -99,8 +99,8 @@ export default function Landing() {
         </p>
 
         <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
-          <Link to="/dashboard" style={{ background: "linear-gradient(135deg, #D4AF37, #00E5FF)", color: "#0A0A0A", padding: "15px 34px", borderRadius: 16, fontSize: 17, fontWeight: 900, textDecoration: "none", display: "flex", alignItems: "center", gap: 8, animation: "glow 3s ease-in-out infinite" }}>
-            התחל בחינם <ArrowLeft size={18} />
+          <Link to="/pricing" style={{ background: "linear-gradient(135deg, #D4AF37, #00E5FF)", color: "#0A0A0A", padding: "15px 34px", borderRadius: 16, fontSize: 17, fontWeight: 900, textDecoration: "none", display: "flex", alignItems: "center", gap: 8, animation: "glow 3s ease-in-out infinite" }}>
+            התחל עכשיו <ArrowLeft size={18} />
           </Link>
           <a href="#features" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", padding: "15px 34px", borderRadius: 16, fontSize: 17, textDecoration: "none" }}>
             ראה איך זה עובד

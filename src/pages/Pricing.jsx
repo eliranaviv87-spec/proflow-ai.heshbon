@@ -172,14 +172,14 @@ export default function Pricing() {
                   </div>
                 ))}
               </div>
-              <Link to="/" style={{
+              <Link to="/dashboard" style={{
                 display: "block", textAlign: "center",
                 background: popular ? `linear-gradient(135deg, ${color}, #00E5FF)` : `${color}18`,
                 color: popular ? "#0A0A0A" : color,
                 border: popular ? "none" : `1px solid ${color}40`,
                 padding: "12px", borderRadius: 14, fontWeight: 800, textDecoration: "none", fontSize: 14,
               }}>
-                התחל עכשיו
+                התחל עכשיו — {name}
               </Link>
             </div>
           ))}
