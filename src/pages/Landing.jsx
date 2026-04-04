@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import AccessibilityBar from "../components/AccessibilityBar";
 import { useState, useEffect } from "react";
 import { Zap, Shield, TrendingUp, FileText, Brain, ArrowLeft, Star, Check, MessageCircle, Phone, Mail, MapPin } from "lucide-react";
 import PricingTable from "../components/PricingTable";
@@ -331,6 +332,7 @@ export default function Landing() {
         </div>
       </section>
 
+      <AccessibilityBar />
       <Footer />
     </div>
   );

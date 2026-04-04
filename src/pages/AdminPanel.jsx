@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { Crown, Users, Building2, FileText, TrendingUp, RefreshCw, Ticket, Clock, CheckCircle, AlertCircle, DollarSign, Star, Link2 } from "lucide-react";
+import { Crown, Users, Building2, FileText, TrendingUp, RefreshCw, Ticket, Clock, CheckCircle, AlertCircle, DollarSign, Star, Link2, Cpu, UserCheck } from "lucide-react";
 import ManageAdmins from "../components/admin/ManageAdmins";
 
 const formatCurrency = (n) =>
@@ -12,6 +12,8 @@ export default function AdminPanel() {
   const [users, setUsers] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [affiliates, setAffiliates] = useState([]);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [eliteApps, setEliteApps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -27,12 +29,16 @@ export default function AdminPanel() {
       base44.entities.User.list("-created_date", 500),
       base44.entities.SupportTicket.list("-created_date", 100),
       base44.entities.Affiliate.list("-created_date", 200),
-    ]).then(([o, d, u, t, a]) => {
+      base44.entities.Subscription.list("-created_date", 500),
+      base44.entities.AmbassadorApplication.filter({ status: "pending", track: "elite" }),
+    ]).then(([o, d, u, t, a, subs, elite]) => {
       setOrgs(o);
       setDocs(d);
       setUsers(u);
       setTickets(t);
       setAffiliates(a);
+      setSubscriptions(subs);
+      setEliteApps(elite);
       setLoading(false);
     });
   }, []);
@@ -61,8 +67,20 @@ export default function AdminPanel() {
   const totalAffiliateCommission = affiliates.reduce((s, a) => s + (a.total_commission || 0), 0);
   const pendingAffiliatePayouts = affiliates.reduce((s, a) => s + (a.pending_payout || 0), 0);
 
+  const approveElite = async (app) => {
+    await base44.entities.AmbassadorApplication.update(app.id, { status: "active" });
+    setEliteApps(prev => prev.filter(a => a.id !== app.id));
+  };
+
+  const rejectElite = async (app) => {
+    await base44.entities.AmbassadorApplication.update(app.id, { status: "rejected" });
+    setEliteApps(prev => prev.filter(a => a.id !== app.id));
+  };
+
   const tabs = [
     { id: "overview", label: "סקירה כללית" },
+    { id: "tokens", label: `טוקנים (${subscriptions.length})` },
+    { id: "elite", label: `בקשות Elite (${eliteApps.length})${eliteApps.length > 0 ? " 🔔" : ""}` },
     { id: "tickets", label: `פניות (${tickets.filter(t => t.status === "Open").length})` },
     { id: "affiliates", label: `שגרירים (${affiliates.length})` },
     { id: "users", label: `משתמשים (${users.length})` },
@@ -302,6 +320,100 @@ export default function AdminPanel() {
             </tbody>
           </table>
         </div>
+      </div>
+      )}
+
+      {activeTab === "tokens" && (
+      <div className="glass-card p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <Cpu size={16} style={{ color: "#B388FF" }} />
+          <p className="text-sm font-semibold text-white">ניטור שימוש בטוקנים AI ({subscriptions.length} מנויים)</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                {["אימייל", "חבילה", "טוקנים חודשיים", "טוקנים שנוצלו", "% שימוש", "סטטוס"].map(h => (
+                  <th key={h} className="text-right pb-3 px-2 text-xs font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {subscriptions.length === 0 && (<tr><td colSpan={6} className="text-center py-8" style={{ color: "rgba(255,255,255,0.3)" }}>אין מנויים</td></tr>)}
+              {subscriptions.map(sub => {
+                const limits = { Discovery: 0, Starter: 50000, Pro: 200000, Enterprise: Infinity };
+                const limit = limits[sub.plan_name] || 0;
+                const used = sub.tokens_consumed_this_month || 0;
+                const pct = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+                const alert = pct > 80;
+                return (
+                  <tr key={sub.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
+                    <td className="py-2.5 px-2 text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>{sub.user_email || "—"}</td>
+                    <td className="py-2.5 px-2">
+                      <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(179,136,255,0.1)", color: "#B388FF" }}>{sub.plan_name}</span>
+                    </td>
+                    <td className="py-2.5 px-2 text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{limit === Infinity ? "ללא הגבלה" : limit.toLocaleString()}</td>
+                    <td className="py-2.5 px-2 text-xs font-semibold" style={{ color: alert ? "#ff6b6b" : "rgba(255,255,255,0.8)" }}>{used.toLocaleString()}</td>
+                    <td className="py-2.5 px-2">
+                      {limit > 0 ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                          <div style={{ flex: 1, height: 6, borderRadius: 6, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+                            <div style={{ height: "100%", borderRadius: 6, background: alert ? "#ff6b6b" : pct > 50 ? "#FFAB00" : "#4ade80", width: `${pct}%` }} />
+                          </div>
+                          <span className="text-xs" style={{ color: alert ? "#ff6b6b" : "rgba(255,255,255,0.5)", minWidth: 30 }}>{pct}%</span>
+                        </div>
+                      ) : <span className="text-xs" style={{ color: "rgba(255,255,255,0.3)" }}>—</span>}
+                    </td>
+                    <td className="py-2.5 px-2">
+                      <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: sub.status === "active" ? "rgba(74,222,128,0.1)" : "rgba(255,107,107,0.1)", color: sub.status === "active" ? "#4ade80" : "#ff6b6b" }}>{sub.status === "active" ? "פעיל" : sub.status}</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      )}
+
+      {activeTab === "elite" && (
+      <div className="glass-card p-5" style={{ border: "1px solid rgba(212,175,55,0.2)" }}>
+        <div className="flex items-center gap-2 mb-4">
+          <UserCheck size={16} style={{ color: "#D4AF37" }} />
+          <p className="text-sm font-semibold text-white">בקשות הצטרפות Elite ממתינות לאישור ({eliteApps.length})</p>
+        </div>
+        {eliteApps.length === 0 ? (
+          <div className="text-center py-12" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <UserCheck size={32} style={{ margin: "0 auto 12px", opacity: 0.2 }} />
+            <p>אין בקשות ממתינות</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {eliteApps.map(app => (
+              <div key={app.id} style={{ padding: "16px", borderRadius: 14, background: "rgba(212,175,55,0.04)", border: "1px solid rgba(212,175,55,0.15)" }}>
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div>
+                    <p className="text-sm font-bold text-white">{app.full_name}</p>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{app.email} · {app.phone}</p>
+                    {app.sales_description && (
+                      <p className="text-xs mt-2 p-2 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", color: "rgba(255,255,255,0.6)", maxWidth: 400 }}>
+                        ניסיון מכירות: {app.sales_description}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => approveElite(app)} style={{ padding: "8px 18px", borderRadius: 10, background: "rgba(74,222,128,0.15)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                      ✓ אשר
+                    </button>
+                    <button onClick={() => rejectElite(app)} style={{ padding: "8px 18px", borderRadius: 10, background: "rgba(255,107,107,0.1)", color: "#ff6b6b", border: "1px solid rgba(255,107,107,0.2)", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                      ✗ דחה
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       )}
 

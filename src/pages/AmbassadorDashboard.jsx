@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, Users, DollarSign, Star, RefreshCw, Copy, CheckCircle, AlertTriangle, Clock, ArrowUpRight } from "lucide-react";
+import { TrendingUp, Users, DollarSign, Star, RefreshCw, Copy, CheckCircle, AlertTriangle, Clock, ArrowUpRight, Bell } from "lucide-react";
 
 const fmt = (n) => new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(n || 0);
 
@@ -55,6 +55,9 @@ export default function AmbassadorDashboard() {
     }
     setRequestingPayout(false);
   };
+
+  // Churn alerts: referrals that were canceled
+  const churnedReferrals = referrals.filter(r => r.status === "canceled" || r.status === "past_due");
 
   const isElite = ambassador?.track === "elite";
   const totalReferrals = ambassador?.total_referrals || 0;
@@ -113,6 +116,25 @@ export default function AmbassadorDashboard() {
           </span>
         </div>
       </div>
+
+      {/* Churn Alerts */}
+      {churnedReferrals.length > 0 && (
+        <div style={{ padding: "14px 18px", borderRadius: 14, background: "rgba(255,107,107,0.06)", border: "1px solid rgba(255,107,107,0.25)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+            <Bell size={15} style={{ color: "#ff6b6b" }} />
+            <p style={{ fontSize: 13, fontWeight: 700, color: "#ff6b6b" }}>⚠️ התראת Churn — {churnedReferrals.length} לקוח/ות ביטלו/כשל תשלום</p>
+          </div>
+          <div className="space-y-1">
+            {churnedReferrals.map(r => (
+              <div key={r.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 12, padding: "6px 10px", borderRadius: 8, background: "rgba(255,107,107,0.04)" }}>
+                <span style={{ color: "rgba(255,255,255,0.7)" }}>{r.user_email}</span>
+                <span style={{ color: r.status === "past_due" ? "#FFAB00" : "#ff6b6b", fontWeight: 600 }}>{r.status === "past_due" ? "כשל תשלום" : "בוטל"}</span>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: 11, color: "rgba(255,107,107,0.6)", marginTop: 8 }}>💡 פנה ללקוחות כדי לשמר את העמלות שלך</p>
+        </div>
+      )}
 
       {/* Referral Link */}
       <div className="glass-card p-5">
