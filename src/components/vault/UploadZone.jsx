@@ -7,12 +7,17 @@ import { cn } from "@/lib/utils";
 export default function UploadZone({ onDocumentCreated }) {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [currentFile, setCurrentFile] = useState("");
+  const [statusMsg, setStatusMsg] = useState("");
 
   const processFile = useCallback(async (file) => {
     setUploading(true);
+    setCurrentFile(file.name);
+    setStatusMsg("מעלה קובץ...");
     try {
       // Upload file
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setStatusMsg("מנתח מסמך עם AI (OCR)...");
 
       // Create document record
       const doc = await base44.entities.Document.create({
@@ -51,6 +56,7 @@ export default function UploadZone({ onDocumentCreated }) {
       const confidence = isValid ? 0.95 : 0.6;
       const status = isValid ? "Verified" : "Pending_Review";
 
+      setStatusMsg("שומר נתונים...");
       await base44.entities.Document.update(doc.id, {
         supplier_name: extracted.vendor_name || "",
         doc_number: extracted.invoice_number || "",
@@ -64,13 +70,16 @@ export default function UploadZone({ onDocumentCreated }) {
         status,
       });
 
+      setStatusMsg("✓ הושלם בהצלחה!");
       toast.success("מסמך עובד בהצלחה ע״י AI");
       onDocumentCreated?.();
     } catch (err) {
       console.error(err);
+      setStatusMsg("");
       toast.error("שגיאה בעיבוד המסמך");
     } finally {
       setUploading(false);
+      setTimeout(() => { setCurrentFile(""); setStatusMsg(""); }, 2000);
     }
   }, [onDocumentCreated]);
 
@@ -108,8 +117,12 @@ export default function UploadZone({ onDocumentCreated }) {
       {uploading ? (
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-10 h-10 text-neon-purple animate-spin" />
-          <p className="text-sm text-neon-purple font-medium">AI מעבד את המסמך...</p>
-          <p className="text-xs text-muted-foreground">חילוץ נתונים אוטומטי</p>
+          <p className="text-sm text-neon-purple font-medium">{statusMsg || "מעבד..."}</p>
+          {currentFile && (
+            <p className="text-xs px-3 py-1 rounded-full" style={{ background: "rgba(179,136,255,0.1)", color: "rgba(179,136,255,0.8)", border: "1px solid rgba(179,136,255,0.2)" }}>
+              📄 {currentFile}
+            </p>
+          )}
         </div>
       ) : (
         <div className="flex flex-col items-center gap-3">

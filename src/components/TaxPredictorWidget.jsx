@@ -159,6 +159,13 @@ export default function TaxPredictorWidget({ totalIncome, totalExpenses, vatOwed
           )}
         </div>
       )}
+
+      {/* Legal Disclaimer */}
+      <div style={{ marginTop: 14, padding: "10px 12px", borderRadius: 10, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
+        <p style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", lineHeight: 1.7 }}>
+          ⚠️ <strong style={{ color: "rgba(255,255,255,0.4)" }}>כתב ויתור:</strong> הנתונים המוצגים הינם הערכה אוטומטית בלבד ואינם מהווים ייעוץ מס מקצועי. לפני כל החלטה פיננסית או מיסויית, יש להתייעץ עם רואה חשבון מורשה.
+        </p>
+      </div>
     </div>
   );
 }

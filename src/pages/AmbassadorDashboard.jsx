@@ -151,6 +151,28 @@ export default function AmbassadorDashboard() {
         <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 8 }}>קוד הפנייה: <code style={{ color: "#D4AF37" }}>{ambassador.ref_code}</code></p>
       </div>
 
+      {/* Progress to Elite (for Starter ambassadors) */}
+      {!isElite && (
+        <div style={{ background: "rgba(255,171,0,0.04)", border: "1px solid rgba(255,171,0,0.18)", borderRadius: 16, padding: "16px 20px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontSize: 18 }}>👑</span>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 800, color: "#FFAB00" }}>התקדמות לדרגת Elite</p>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)" }}>5 הפניות פעילות = 50% עמלה חוזרת לנצח</p>
+              </div>
+            </div>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>{totalReferrals}/5 הפניות</span>
+          </div>
+          <div style={{ height: 8, borderRadius: 8, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+            <div style={{ height: "100%", borderRadius: 8, background: "linear-gradient(90deg, #FFAB00, #D4AF37)", width: `${Math.min(100, (totalReferrals / 5) * 100)}%`, transition: "width 0.6s ease" }} />
+          </div>
+          {totalReferrals < 5 && (
+            <p style={{ fontSize: 11, color: "rgba(255,171,0,0.55)", marginTop: 8 }}>עוד {5 - totalReferrals} הפניות פעילות לפתיחת Elite 🔥</p>
+          )}
+        </div>
+      )}
+
       {/* Rank Progress Bar */}
       <div style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${rc.color}25`, borderRadius: 16, padding: "18px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>

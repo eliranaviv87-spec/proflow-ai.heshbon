@@ -5,6 +5,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import AIAdviceModal from "../components/AIAdviceModal";
 import AiSmartSummary from "../components/AiSmartSummary";
 import TaxPredictorWidget from "../components/TaxPredictorWidget";
+import NextStepsWidget from "../components/NextStepsWidget";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(n || 0);
@@ -75,6 +76,9 @@ export default function Dashboard() {
         <h1 className="text-xl md:text-2xl font-bold text-white mb-1">המיליונים שלך עובדים בשבילך. הנה תמונת המצב.</h1>
         <p className="text-xs md:text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>עדכון אחרון: {new Date().toLocaleDateString("he-IL")}</p>
       </div>
+
+      {/* Next Steps Widget */}
+      <NextStepsWidget docs={docs} />
 
       {/* AI Smart Summary */}
       <AiSmartSummary totalIncome={totalIncome} totalExpenses={totalExpenses} vatOwed={vatOwed} docsCount={docs.length} />
