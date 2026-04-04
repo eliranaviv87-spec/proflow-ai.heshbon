@@ -81,8 +81,9 @@ export default function Layout() {
           const active = location.pathname === path;
           return (
             <Link key={path} to={path} onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
               style={{
+                transition: "all 0.15s ease-in-out",
                 background: active ? "rgba(0,229,255,0.08)" : "transparent",
                 border: active ? "1px solid rgba(0,229,255,0.15)" : "1px solid transparent",
                 color: active ? "#00E5FF" : "rgba(255,255,255,0.5)",
@@ -154,8 +155,8 @@ export default function Layout() {
 
       {/* Desktop Sidebar */}
       {!isMobile && (
-        <div className="flex flex-col transition-all duration-300 border-l flex-shrink-0"
-          style={{ width: collapsed ? "64px" : "220px", background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.06)" }}>
+        <div className="flex flex-col border-l flex-shrink-0"
+          style={{ width: collapsed ? "64px" : "220px", transition: "width 0.2s ease-in-out", background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.06)" }}>
           <SidebarContent mobile={false} />
         </div>
       )}

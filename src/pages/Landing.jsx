@@ -95,15 +95,17 @@ export default function Landing() {
           <span style={{ fontSize: 13, color: "#00E5FF" }}>AI Financial OS — הדור הבא לניהול פיננסי עסקי</span>
         </div>
 
-        <h1 style={{ fontSize: "clamp(38px, 6.5vw, 68px)", fontWeight: 900, lineHeight: 1.12, marginBottom: 22 }}>
+        <h1 style={{ fontSize: "clamp(38px, 6.5vw, 68px)", fontWeight: 900, lineHeight: 1.12, marginBottom: 22, letterSpacing: "-1px" }}>
           הכספים שלך עובדים<br />
-          <span style={{ background: "linear-gradient(135deg, #D4AF37, #00E5FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>בשבילך בשקט</span>
+          <span style={{ background: "linear-gradient(135deg, #D4AF37 0%, #F5D98A 40%, #D4AF37 70%, #FFAB00 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", filter: "drop-shadow(0 0 30px rgba(212,175,55,0.4))" }}>בשבילך בשקט</span>
         </h1>
 
-        <p style={{ fontSize: 19, color: "rgba(255,255,255,0.5)", maxWidth: 580, margin: "0 auto 44px", lineHeight: 1.75 }}>
+
+        <p style={{ fontSize: 19, color: "rgba(255,255,255,0.82)", maxWidth: 580, margin: "0 auto 44px", lineHeight: 1.75 }}>
           פלטפורם AI המטפל בחשבוניות, מס, תזרים ודוחות — אוטומטית.
           חיסכון של <strong style={{ color: "#D4AF37" }}>10+ שעות בחודש</strong> לכל עסק.
         </p>
+
 
         <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
           <Link to="/pricing" style={{ background: "linear-gradient(135deg, #D4AF37, #00E5FF)", color: "#0A0A0A", padding: "15px 34px", borderRadius: 16, fontSize: 17, fontWeight: 900, textDecoration: "none", display: "flex", alignItems: "center", gap: 8, animation: "glow 3s ease-in-out infinite" }}>

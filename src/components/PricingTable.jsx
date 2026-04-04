@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useEffect } from "react";
+
 import { Link } from "react-router-dom";
 import { Check, Zap, Brain, Building2, Star, Clock } from "lucide-react";
 
@@ -54,6 +56,8 @@ const getPlans = (isAnnual) => {
 
 export default function PricingTable() {
   const [isAnnual, setIsAnnual] = useState(true);
+  const [hovered, setHovered] = useState(null);
+
   const plans = getPlans(isAnnual);
 
   return (
@@ -73,13 +77,19 @@ export default function PricingTable() {
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 20, maxWidth: 1050, margin: "0 auto" }}>
         {plans.map(({ name, price, period, color, icon: Icon, popular, badge, aiModel, aiLimit, note, features }) => (
-          <div key={name} style={{
+          <div key={name}
+            onMouseEnter={() => setHovered(name)}
+            onMouseLeave={() => setHovered(null)}
+            style={{
             background: popular ? `linear-gradient(135deg, ${color}10, rgba(255,255,255,0.03))` : "rgba(255,255,255,0.03)",
-            border: `1px solid ${popular ? color + "50" : "rgba(255,255,255,0.08)"}`,
+            border: `1px solid ${hovered === name ? color + "80" : popular ? color + "50" : "rgba(255,255,255,0.08)"}`,
             borderRadius: 24, padding: "28px 22px", position: "relative",
             backdropFilter: "blur(15px)",
-            boxShadow: popular ? `0 0 40px ${color}15` : "none",
+            transition: "all 0.2s ease-in-out",
+            boxShadow: hovered === name ? `0 0 50px ${color}25, 0 0 120px ${color}08` : popular ? `0 0 40px ${color}15` : "none",
+            transform: hovered === name ? "translateY(-4px)" : "none",
           }}>
+
             {popular && (
               <div style={{ position: "absolute", top: -14, right: "50%", transform: "translateX(50%)", background: `linear-gradient(135deg, ${color}, #00E5FF)`, color: "#0A0A0A", padding: "5px 18px", borderRadius: 50, fontSize: 11, fontWeight: 800, whiteSpace: "nowrap" }}>הכי פופולרי 🔥</div>
             )}
@@ -112,16 +122,24 @@ export default function PricingTable() {
                 </div>
               ))}
             </div>
-            <Link to="/" style={{
+            <Link to="/pricing" style={{
               display: "block", textAlign: "center",
               background: popular ? `linear-gradient(135deg, ${color}, #00E5FF)` : `${color}18`,
               color: popular ? "#0A0A0A" : color,
               border: popular ? "none" : `1px solid ${color}40`,
               padding: "12px", borderRadius: 14, fontWeight: 800, textDecoration: "none", fontSize: 14,
-            }}>התחל עכשיו</Link>
+              animation: popular ? "cta-pulse 2.5s ease-in-out infinite" : "none",
+              boxShadow: popular ? `0 0 20px ${color}40` : "none",
+            }}>התחל עכשיו →</Link>
           </div>
         ))}
       </div>
+      <style>{`
+        @keyframes cta-pulse {
+          0%, 100% { box-shadow: 0 0 20px rgba(179,136,255,0.4); }
+          50% { box-shadow: 0 0 40px rgba(179,136,255,0.7), 0 0 80px rgba(0,229,255,0.2); }
+        }
+      `}</style>
       {/* Resource Center Notice */}
       <div style={{ textAlign: "center", marginTop: 32, padding: "16px 24px", background: "rgba(0,229,255,0.05)", border: "1px solid rgba(0,229,255,0.15)", borderRadius: 16, maxWidth: 600, margin: "32px auto 0" }}>
         <p style={{ fontSize: 13, color: "rgba(0,229,255,0.8)" }}>
