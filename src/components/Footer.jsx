@@ -86,6 +86,7 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Bottom */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "space-between", alignItems: "center", paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
           <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 12 }}>© 2025 ProFlow AI. כל הזכויות שמורות.</p>
           <p style={{ color: "rgba(255,255,255,0.15)", fontSize: 11 }}>Powered by AI · Secured by Design · Built for Israeli Business</p>
