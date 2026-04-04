@@ -3,12 +3,11 @@ import { useState, useEffect } from "react";
 import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Zap, Users, FileText, Link2, Home, Crown, BrainCircuit, MessageCircle, Building2 } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import NotificationsBell from "./NotificationsBell";
-import AdminFloatingPanel from "./AdminFloatingPanel";
 import SupportChatWidget from "./SupportChatWidget";
 
 const userNavItems = [
-  { path: "/landing", label: "דף הבית", icon: Home },
-  { path: "/", label: "דשבורד", icon: LayoutDashboard },
+  { path: "/", label: "דף הבית", icon: Home },
+  { path: "/dashboard", label: "דשבורד", icon: LayoutDashboard },
   { path: "/vault", label: "מרכז מסמכים", icon: Archive },
   { path: "/banking", label: "בנקאות", icon: Landmark },
   { path: "/reports", label: "דוחות AI", icon: BarChart3 },
@@ -39,7 +38,7 @@ export default function Layout() {
   const isAdmin = user?.role === "admin" || user?.data?.role === "admin";
 
   const mobileNavItems = [
-    { path: "/", label: "דשבורד", icon: LayoutDashboard },
+    { path: "/dashboard", label: "דשבורד", icon: LayoutDashboard },
     { path: "/vault", label: "מסמכים", icon: Archive },
     { path: "/banking", label: "בנקאות", icon: Landmark },
     { path: "/smart-reports", label: "דוחות", icon: BrainCircuit },
@@ -214,7 +213,6 @@ export default function Layout() {
         </nav>
       )}
 
-      <AdminFloatingPanel />
       <SupportChatWidget />
     </div>
   );

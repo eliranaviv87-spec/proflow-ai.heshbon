@@ -15,8 +15,8 @@ const allLinks = [
     { path: "/settings", label: "הגדרות גלובליות", icon: Settings },
   ]},
   { section: "משתמש", items: [
-    { path: "/landing", label: "דף הבית", icon: Home },
-    { path: "/", label: "דשבורד", icon: LayoutDashboard },
+    { path: "/", label: "דף הבית", icon: Home },
+    { path: "/dashboard", label: "דשבורד", icon: LayoutDashboard },
     { path: "/vault", label: "מרכז מסמכים", icon: Archive },
     { path: "/banking", label: "בנקאות", icon: Landmark },
     { path: "/reports", label: "דוחות AI", icon: BarChart3 },
