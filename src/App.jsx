@@ -20,6 +20,7 @@ import Forbidden from './pages/Forbidden';
 import AdminRoute from './components/AdminRoute';
 import SmartReports from './pages/SmartReports';
 import WhatsAppConnect from './pages/WhatsAppConnect';
+import AmbassadorProgram from './pages/AmbassadorProgram';
 import TaxAuthorityHub from './pages/TaxAuthorityHub';
 
 const AuthenticatedApp = () => {
@@ -60,6 +61,7 @@ const AuthenticatedApp = () => {
         <Route path="/tax-authority" element={<TaxAuthorityHub />} />
         <Route path="/settings" element={<AdminRoute><Settings /></AdminRoute>} />
       </Route>
+      <Route path="/ambassador-program" element={<AmbassadorProgram />} />
       <Route path="/403" element={<Forbidden />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

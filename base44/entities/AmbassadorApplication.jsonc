@@ -1,0 +1,79 @@
+{
+  "name": "AmbassadorApplication",
+  "type": "object",
+  "properties": {
+    "full_name": {
+      "type": "string",
+      "title": "\u05e9\u05dd \u05de\u05dc\u05d0"
+    },
+    "email": {
+      "type": "string",
+      "title": "\u05d0\u05d9\u05de\u05d9\u05d9\u05dc"
+    },
+    "phone": {
+      "type": "string",
+      "title": "\u05d8\u05dc\u05e4\u05d5\u05df"
+    },
+    "track": {
+      "type": "string",
+      "enum": [
+        "starter",
+        "elite"
+      ],
+      "title": "\u05de\u05e1\u05dc\u05d5\u05dc"
+    },
+    "sales_experience": {
+      "type": "boolean",
+      "default": false,
+      "title": "\u05e0\u05d9\u05e1\u05d9\u05d5\u05df \u05d1\u05de\u05db\u05d9\u05e8\u05d5\u05ea/\u05d8\u05dc\u05de\u05e8\u05e7\u05d8\u05d9\u05e0\u05d2"
+    },
+    "sales_description": {
+      "type": "string",
+      "title": "\u05ea\u05d9\u05d0\u05d5\u05e8 \u05e0\u05d9\u05e1\u05d9\u05d5\u05df \u05d4\u05de\u05db\u05d9\u05e8\u05d5\u05ea"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "charged"
+      ],
+      "default": "pending",
+      "title": "\u05e1\u05d8\u05d8\u05d5\u05e1"
+    },
+    "ref_code": {
+      "type": "string",
+      "title": "\u05e7\u05d5\u05d3 \u05d4\u05e4\u05e0\u05d9\u05d4 \u05d9\u05d9\u05e2\u05d5\u05d3\u05d9"
+    },
+    "tos_agreed": {
+      "type": "boolean",
+      "default": false,
+      "title": "\u05d0\u05d9\u05e9\u05d5\u05e8 \u05ea\u05e0\u05d0\u05d9 \u05e9\u05d9\u05e8\u05d5\u05ea"
+    },
+    "elite_tos_agreed": {
+      "type": "boolean",
+      "default": false,
+      "title": "\u05d0\u05d9\u05e9\u05d5\u05e8 \u05ea\u05e0\u05d0\u05d9 \u05e9\u05d2\u05e8\u05d9\u05e8\u05d9\u05dd"
+    },
+    "card_preauth_token": {
+      "type": "string",
+      "title": "\u05d8\u05d5\u05e7\u05df Pre-Auth"
+    },
+    "welcome_email_sent": {
+      "type": "boolean",
+      "default": false,
+      "title": "\u05de\u05d9\u05d9\u05dc Welcome \u05e0\u05e9\u05dc\u05d7"
+    },
+    "admin_notes": {
+      "type": "string",
+      "title": "\u05d4\u05e2\u05e8\u05d5\u05ea \u05de\u05e0\u05d4\u05dc"
+    }
+  },
+  "required": [
+    "full_name",
+    "email",
+    "phone",
+    "track"
+  ]
+}
