@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import * as XLSX from "xlsx";
+import { jsPDF } from "jspdf";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell } from "recharts";
 import { Sparkles, TrendingUp, TrendingDown, FileText, Calendar, Download, RefreshCw, AlertTriangle } from "lucide-react";
 
@@ -102,17 +104,56 @@ export default function SmartReports() {
     });
   };
 
-  const exportCSV = () => {
+  const exportExcel = () => {
     const rows = [
-      ["חודש", "הכנסות", "הוצאות", "מע\"מ", "מסמכים"],
+      ["חודש", "הכנסות", "הוצאות", 'מע"מ', "מסמכים"],
       ...monthData.map(m => [m.month, m.income, m.expense, m.vat, m.docs])
     ];
-    const csv = rows.map(r => r.join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `ProFlow_SmartReport_${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "דוח חודשי");
+
+    const catRows = [["קטגוריה", "סכום"], ...catData.map(c => [c.name, c.value])];
+    const ws2 = XLSX.utils.aoa_to_sheet(catRows);
+    XLSX.utils.book_append_sheet(wb, ws2, "קטגוריות");
+
+    XLSX.writeFile(wb, `ProFlow_Report_${new Date().toISOString().slice(0,10)}.xlsx`);
+  };
+
+  const exportPDF = () => {
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    doc.setFont("helvetica");
+    doc.setFontSize(18);
+    doc.text("ProFlow AI - Financial Report", 20, 20);
+    doc.setFontSize(10);
+    doc.text(`Generated: ${new Date().toLocaleDateString("he-IL")}`, 20, 30);
+
+    doc.setFontSize(13);
+    doc.text("Summary", 20, 42);
+    doc.setFontSize(10);
+    doc.text(`Total Income: ${fmt(totalIncome)}`, 20, 50);
+    doc.text(`Total Expenses: ${fmt(totalExpense)}`, 20, 57);
+    doc.text(`Net Profit: ${fmt(netProfit)}`, 20, 64);
+    doc.text(`VAT Collected: ${fmt(totalVAT)}`, 20, 71);
+
+    doc.setFontSize(13);
+    doc.text("Monthly Breakdown", 20, 83);
+    doc.setFontSize(9);
+    const headers = ["Month", "Income", "Expenses", "VAT", "Docs"];
+    let y = 90;
+    headers.forEach((h, i) => doc.text(h, 20 + i * 34, y));
+    y += 6;
+    monthData.forEach(m => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.text(m.month, 20, y);
+      doc.text(String(Math.round(m.income)), 54, y);
+      doc.text(String(Math.round(m.expense)), 88, y);
+      doc.text(String(Math.round(m.vat)), 122, y);
+      doc.text(String(m.docs), 156, y);
+      y += 7;
+    });
+
+    doc.save(`ProFlow_Report_${new Date().toISOString().slice(0,10)}.pdf`);
   };
 
   return (
@@ -124,8 +165,11 @@ export default function SmartReports() {
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>ניתוח פיננסי AI מעמיק + תחזיות אוטומטיות</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <Download size={14} /> ייצוא CSV
+          <button onClick={exportExcel} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <Download size={14} /> ייצוא Excel
+          </button>
+          <button onClick={exportPDF} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <Download size={14} /> ייצוא PDF
           </button>
           <button onClick={generateAI} disabled={loadingAI} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all" style={{ background: "linear-gradient(135deg, rgba(179,136,255,0.2), rgba(0,229,255,0.15))", color: "#B388FF", border: "1px solid rgba(179,136,255,0.3)" }}>
             {loadingAI ? <RefreshCw size={14} className="animate-spin" /> : <Sparkles size={14} />}
