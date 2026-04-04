@@ -17,7 +17,7 @@ export default function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] p-4" style={{ direction: "rtl" }}>
+    <div className="fixed bottom-0 md:bottom-0 left-0 right-0 z-[9999] p-4 pb-20 md:pb-4" style={{ direction: "rtl" }}>
       <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-2xl"
         style={{ background: "rgba(15,15,20,0.97)", border: "1px solid rgba(0,229,255,0.2)", backdropFilter: "blur(20px)", boxShadow: "0 -4px 40px rgba(0,229,255,0.08)" }}>
         <Cookie size={22} style={{ color: "#00E5FF", flexShrink: 0 }} />

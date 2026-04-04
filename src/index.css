@@ -132,35 +132,44 @@
   animation: neon-pulse 2s ease-in-out infinite;
 }
 
-/* Button helpers */
+/* Button utilities */
 .btn-cyan {
-  background: rgba(0,229,255,0.1);
+  background: rgba(0, 229, 255, 0.12);
   color: #00E5FF;
-  border: 1px solid rgba(0,229,255,0.25);
+  border: 1px solid rgba(0, 229, 255, 0.3);
   transition: all 0.2s;
 }
 .btn-cyan:hover {
-  background: rgba(0,229,255,0.18);
+  background: rgba(0, 229, 255, 0.2);
 }
 .btn-amber {
-  background: rgba(255,171,0,0.1);
+  background: rgba(255, 171, 0, 0.12);
   color: #FFAB00;
-  border: 1px solid rgba(255,171,0,0.25);
+  border: 1px solid rgba(255, 171, 0, 0.3);
   transition: all 0.2s;
 }
 .btn-amber:hover {
-  background: rgba(255,171,0,0.18);
+  background: rgba(255, 171, 0, 0.2);
 }
 
-/* Glow helpers */
+/* Neon glow card variants */
 .neon-glow-cyan {
-  box-shadow: 0 0 20px rgba(0,229,255,0.08);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.08);
 }
 .neon-glow-amber {
-  box-shadow: 0 0 20px rgba(255,171,0,0.08);
+  box-shadow: 0 0 20px rgba(255, 171, 0, 0.08);
 }
 .neon-glow-purple {
-  box-shadow: 0 0 20px rgba(179,136,255,0.08);
+  box-shadow: 0 0 20px rgba(179, 136, 255, 0.08);
+}
+
+/* Pulse dot */
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 /* Custom scrollbar */

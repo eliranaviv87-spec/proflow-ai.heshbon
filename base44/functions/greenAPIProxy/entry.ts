@@ -8,7 +8,8 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { action, instanceId, apiToken } = await req.json();
+    const body = await req.json();
+    const { action, instanceId, apiToken } = body;
 
     if (action === "getQR") {
       const res = await fetch(`${GREENAPI_BASE}/waInstance${instanceId}/qr/${apiToken}`);
@@ -23,7 +24,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === "sendMessage") {
-      const { phone, message } = await req.json().catch(() => ({}));
+      const { phone, message } = body;
       const res = await fetch(`${GREENAPI_BASE}/waInstance${instanceId}/sendMessage/${apiToken}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

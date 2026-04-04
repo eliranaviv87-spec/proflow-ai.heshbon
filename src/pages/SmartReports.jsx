@@ -159,12 +159,12 @@ export default function SmartReports() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white mb-1">מנוע דוחות חכם</h1>
           <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>ניתוח פיננסי AI מעמיק + תחזיות אוטומטיות</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button onClick={exportExcel} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.08)" }}>
             <Download size={14} /> ייצוא Excel
           </button>
