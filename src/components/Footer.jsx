@@ -86,14 +86,6 @@ export default function Footer() {
           </div>
         </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "space-between", alignItems: "center", paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.05)" }}>, flexWrap: "wrap", justifyContent: "center" }}>
-            <a href="/ambassador-program" style={{ color: "rgba(212,175,55,0.8)", fontSize: 13, textDecoration: "none" }}>🔥 תוכנית שגרירים מוגבלת</a>
-            <Link to="/tos-business" style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, textDecoration: "none" }}>תנאי שימוש — לקוח עסקי</Link>
-            <Link to="/tos-ambassador" style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, textDecoration: "none" }}>הסכם שגריר עלית</Link>
-            <Link to="/" style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textDecoration: "none" }}>כניסה למערכת</Link>
-          </div>
-        </div>
-
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "space-between", alignItems: "center", paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
           <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 12 }}>© 2025 ProFlow AI. כל הזכויות שמורות.</p>
           <p style={{ color: "rgba(255,255,255,0.15)", fontSize: 11 }}>Powered by AI · Secured by Design · Built for Israeli Business</p>
