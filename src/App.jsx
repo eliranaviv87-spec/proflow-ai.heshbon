@@ -22,6 +22,9 @@ import SmartReports from './pages/SmartReports';
 import WhatsAppConnect from './pages/WhatsAppConnect';
 import AmbassadorProgram from './pages/AmbassadorProgram';
 import TaxAuthorityHub from './pages/TaxAuthorityHub';
+import AmbassadorDashboard from './pages/AmbassadorDashboard';
+import BusinessCustomerTOS from './pages/BusinessCustomerTOS';
+import AmbassadorEliteContract from './pages/AmbassadorEliteContract';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -62,6 +65,9 @@ const AuthenticatedApp = () => {
         <Route path="/settings" element={<AdminRoute><Settings /></AdminRoute>} />
       </Route>
       <Route path="/ambassador-program" element={<AmbassadorProgram />} />
+      <Route path="/ambassador-dashboard" element={<AmbassadorDashboard />} />
+      <Route path="/tos-business" element={<BusinessCustomerTOS />} />
+      <Route path="/tos-ambassador" element={<AmbassadorEliteContract />} />
       <Route path="/403" element={<Forbidden />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
