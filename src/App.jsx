@@ -19,7 +19,6 @@ import AdminPanel from './pages/AdminPanel';
 import Forbidden from './pages/Forbidden';
 import AdminRoute from './components/AdminRoute';
 import SmartReports from './pages/SmartReports';
-import AdminFloatingPanel from './components/AdminFloatingPanel';
 import WhatsAppConnect from './pages/WhatsAppConnect';
 import AmbassadorProgram from './pages/AmbassadorProgram';
 import TaxAuthorityHub from './pages/TaxAuthorityHub';
@@ -52,13 +51,33 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <>
-    <AdminFloatingPanel />
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/pricing" element={<Pricing />} />
+      <Route path="/ambassador-program" element={<AmbassadorProgram />} />
+      <Route path="/ambassador-dashboard" element={<AmbassadorDashboard />} />
+      <Route path="/business-tos" element={<BusinessCustomerTOS />} />
+      <Route path="/ambassador-elite-contract" element={<AmbassadorEliteContract />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route element={<Layout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/vault" element={<Vault />} />
+        <Route path="/banking" element={<Banking />} />
+        <Route path="/reports" element={<AIReports />} />
+        <Route path="/tax-reports" element={<TaxReports />} />
+        <Route path="/smart-reports" element={<SmartReports />} />
+        <Route path="/whatsapp" element={<WhatsAppConnect />} />
+        <Route path="/tax-authority" element={<TaxAuthorityHub />} />
+        <Route path="/ai-credits" element={<AICreditStore />} />
+        <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+        <Route path="/affiliates" element={<AdminRoute><Affiliates /></AdminRoute>} />
+        <Route path="/integrations" element={<AdminRoute><Integrations /></AdminRoute>} />
+        <Route path="/settings" element={<AdminRoute><Settings /></AdminRoute>} />
+        <Route path="/403" element={<Forbidden />} />
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
-    </>
   );
 };
 

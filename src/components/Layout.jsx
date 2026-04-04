@@ -4,6 +4,7 @@ import { LayoutDashboard, Archive, Landmark, BarChart3, Settings, ChevronLeft, Z
 import { useAuth } from "@/lib/AuthContext";
 import NotificationsBell from "./NotificationsBell";
 import SupportChatWidget from "./SupportChatWidget";
+import AdminFloatingPanel from "./AdminFloatingPanel";
 
 const userNavItems = [
   { path: "/", label: "דף הבית", icon: Home },
@@ -214,6 +215,7 @@ export default function Layout() {
       )}
 
       <SupportChatWidget />
+      {isAdmin && <AdminFloatingPanel />}
     </div>
   );
 }
