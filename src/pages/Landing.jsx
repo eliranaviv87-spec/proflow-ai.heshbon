@@ -49,8 +49,12 @@ function LiveCounter() {
 
 export default function Landing() {
   useEffect(() => {
-    base44.auth.isAuthenticated().then(authed => {
-      if (authed) window.location.href = "/dashboard";
+    base44.auth.isAuthenticated().then(async (authed) => {
+      if (authed) {
+        const user = await base44.auth.me();
+        const isAdmin = user?.role === "admin" || user?.data?.role === "admin";
+        if (!isAdmin) window.location.href = "/dashboard";
+      }
     });
   }, []);
 
