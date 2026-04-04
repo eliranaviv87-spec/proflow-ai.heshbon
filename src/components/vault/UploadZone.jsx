@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Upload, FileText, Loader2 } from "lucide-react";
+import { Upload, FileText, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ export default function UploadZone({ onDocumentCreated }) {
   const [uploading, setUploading] = useState(false);
   const [currentFile, setCurrentFile] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
+  const [bulkProgress, setBulkProgress] = useState(null); // {done, total, errors}
 
   const processFile = useCallback(async (file) => {
     setUploading(true);
@@ -83,17 +84,37 @@ export default function UploadZone({ onDocumentCreated }) {
     }
   }, [onDocumentCreated]);
 
+  const processBulk = useCallback(async (files) => {
+    const fileArr = Array.from(files);
+    if (fileArr.length === 1) { processFile(fileArr[0]); return; }
+    setBulkProgress({ done: 0, total: fileArr.length, errors: 0 });
+    setUploading(true);
+    let done = 0, errors = 0;
+    for (const file of fileArr) {
+      setCurrentFile(file.name);
+      setStatusMsg(`מעבד ${done + 1}/${fileArr.length}...`);
+      try { await processFile(file); done++; }
+      catch { errors++; }
+      setBulkProgress({ done: done + errors, total: fileArr.length, errors });
+    }
+    setUploading(false);
+    toast.success(`עיבוד בצובר הושלם: ${done} מסמכים${errors > 0 ? `, ${errors} שגיאות` : ""}`);
+    setBulkProgress(null);
+    setCurrentFile(""); setStatusMsg("");
+    onDocumentCreated?.();
+  }, [processFile, onDocumentCreated]);
+
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setDragging(false);
-    const file = e.dataTransfer?.files?.[0];
-    if (file) processFile(file);
-  }, [processFile]);
+    const files = e.dataTransfer?.files;
+    if (files?.length) processBulk(files);
+  }, [processBulk]);
 
   const handleFileInput = useCallback((e) => {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
-  }, [processFile]);
+    const files = e.target.files;
+    if (files?.length) processBulk(files);
+  }, [processBulk]);
 
   return (
     <div
@@ -111,6 +132,7 @@ export default function UploadZone({ onDocumentCreated }) {
         id="file-upload-input"
         type="file"
         accept="image/*,.pdf"
+        multiple
         className="hidden"
         onChange={handleFileInput}
       />
@@ -123,6 +145,17 @@ export default function UploadZone({ onDocumentCreated }) {
               📄 {currentFile}
             </p>
           )}
+          {bulkProgress && (
+            <div style={{ width: "100%", maxWidth: 260 }}>
+              <div style={{ height: 4, borderRadius: 4, background: "rgba(255,255,255,0.06)", overflow: "hidden" }}>
+                <div style={{ height: "100%", borderRadius: 4, background: "#B388FF", width: `${(bulkProgress.done / bulkProgress.total) * 100}%`, transition: "width 0.4s" }} />
+              </div>
+              <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>
+                {bulkProgress.done}/{bulkProgress.total} קבצים
+                {bulkProgress.errors > 0 && <span style={{ color: "#ff6b6b" }}> · {bulkProgress.errors} שגיאות</span>}
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="flex flex-col items-center gap-3">
@@ -130,8 +163,14 @@ export default function UploadZone({ onDocumentCreated }) {
             <Upload className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <p className="text-sm text-foreground font-medium">גרור לכאן חשבונית או קבלה</p>
-            <p className="text-xs text-muted-foreground mt-0.5">PDF, PNG, JPG • עד 10MB</p>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <p className="text-sm text-foreground font-medium">גרור קבצים לכאן — חשבוניות, קבלות</p>
+              <span
+                title="OCR בצובר: ניתן לגרור או לבחור מספר קבצים בו-זמנית (עד 50). AI יחלץ אוטומטית את כל הנתונים מכל קובץ ויוסיף אותם למסד הנתונים."
+                onClick={e => e.stopPropagation()}
+                style={{ cursor: "help", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 16, height: 16, borderRadius: "50%", background: "rgba(179,136,255,0.12)", border: "1px solid rgba(179,136,255,0.3)", color: "#B388FF", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>?</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">PDF, PNG, JPG • קובץ אחד או מספר קבצים בו-זמנית</p>
           </div>
         </div>
       )}
