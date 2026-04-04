@@ -45,7 +45,7 @@ export default function SupportChatWidget() {
       {/* Floating Button */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all"
+        className="fixed bottom-20 md:bottom-6 left-6 z-[60] w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all"
         style={{
           background: open ? "rgba(255,107,107,0.9)" : "linear-gradient(135deg,#25D366,#128C7E)",
           boxShadow: "0 4px 24px rgba(37,211,102,0.35)",
@@ -58,7 +58,7 @@ export default function SupportChatWidget() {
       {/* Chat Panel */}
       {open && (
         <div
-          className="fixed bottom-24 left-6 z-50 w-80 rounded-2xl overflow-hidden flex flex-col"
+          className="fixed bottom-36 md:bottom-24 left-6 z-[60] w-80 rounded-2xl overflow-hidden flex flex-col"
           style={{
             height: 420,
             background: "#111114",

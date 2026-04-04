@@ -31,7 +31,7 @@ export default function AccessibilityBar() {
   };
 
   return (
-    <div className="fixed top-1/2 left-0 -translate-y-1/2 z-[9998]" style={{ direction: "ltr" }}>
+    <div className="fixed top-1/2 left-0 -translate-y-1/2 z-[9998] hidden md:block" style={{ direction: "ltr" }}>
       <button onClick={() => setOpen(!open)}
         className="flex items-center justify-center w-10 h-10 rounded-r-xl transition-all"
         style={{ background: "rgba(0,229,255,0.15)", border: "1px solid rgba(0,229,255,0.3)", borderRight: "none", color: "#00E5FF" }}

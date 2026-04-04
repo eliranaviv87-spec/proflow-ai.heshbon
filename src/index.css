@@ -132,6 +132,37 @@
   animation: neon-pulse 2s ease-in-out infinite;
 }
 
+/* Button helpers */
+.btn-cyan {
+  background: rgba(0,229,255,0.1);
+  color: #00E5FF;
+  border: 1px solid rgba(0,229,255,0.25);
+  transition: all 0.2s;
+}
+.btn-cyan:hover {
+  background: rgba(0,229,255,0.18);
+}
+.btn-amber {
+  background: rgba(255,171,0,0.1);
+  color: #FFAB00;
+  border: 1px solid rgba(255,171,0,0.25);
+  transition: all 0.2s;
+}
+.btn-amber:hover {
+  background: rgba(255,171,0,0.18);
+}
+
+/* Glow helpers */
+.neon-glow-cyan {
+  box-shadow: 0 0 20px rgba(0,229,255,0.08);
+}
+.neon-glow-amber {
+  box-shadow: 0 0 20px rgba(255,171,0,0.08);
+}
+.neon-glow-purple {
+  box-shadow: 0 0 20px rgba(179,136,255,0.08);
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

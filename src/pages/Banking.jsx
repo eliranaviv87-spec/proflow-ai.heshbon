@@ -82,7 +82,7 @@ export default function Banking() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="glass-card p-4 neon-glow-cyan">
           <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.4)" }}>זיכויים</p>
           <p className="text-xl font-bold" style={{ color: "#00E5FF" }}>{formatCurrency(totalCredit)}</p>

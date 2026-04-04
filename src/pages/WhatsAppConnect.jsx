@@ -17,16 +17,11 @@ export default function WhatsAppConnect() {
   const [statusMsg, setStatusMsg] = useState(null);
 
   useEffect(() => {
-    if (user?.id) {
-      base44.entities.User.filter({ id: user.id }).then((list) => {
-        const u = list[0];
-        if (u) {
-          setUserData(u);
-          setInstanceId(u.whatsapp_instance_id || "");
-          setApiToken(u.whatsapp_api_token || "");
-          setStatus(u.whatsapp_status || "Disconnected");
-        }
-      });
+    if (user) {
+      setUserData(user);
+      setInstanceId(user.whatsapp_instance_id || "");
+      setApiToken(user.whatsapp_api_token || "");
+      setStatus(user.whatsapp_status || "Disconnected");
     }
   }, [user]);
 

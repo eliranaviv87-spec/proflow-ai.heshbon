@@ -113,7 +113,7 @@ export default function TaxReports() {
           {reports.map((report) => {
             const s = statusConfig[report.status] || statusConfig.Draft;
             return (
-              <div key={report.id} className="glass-card p-5 flex items-center justify-between">
+              <div key={report.id} className="glass-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${s.color}15` }}>
                     <FileText size={18} style={{ color: s.color }} />
@@ -126,7 +126,7 @@ export default function TaxReports() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
                   <div className="text-left">
                     <p className="text-xs mb-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>הכנסות</p>
                     <p className="text-sm font-semibold" style={{ color: "#00E5FF" }}>{formatCurrency(report.total_income)}</p>
