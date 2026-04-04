@@ -54,7 +54,7 @@
     },
     "ref_code": {
       "type": "string",
-      "title": "\u05e7\u05d5\u05d3 \u05d4\u05e4\u05e0\u05d9\u05d4 \u05d9\u05d9\u05d7\u05d5\u05d3\u05d9"
+      "title": "\u05e7\u05d5\u05d3 \u05d4\u05e4\u05e0\u05d9\u05d9\u05d4 \u05d9\u05d9\u05d7\u05d5\u05d3\u05d9"
     },
     "tos_agreed": {
       "type": "boolean",
@@ -65,6 +65,10 @@
       "type": "boolean",
       "default": false,
       "title": "\u05ea\u05e9\u05dc\u05d5\u05dd \u05d0\u05d5\u05e9\u05e8 (Pre-Auth)"
+    },
+    "proof_of_payment_url": {
+      "type": "string",
+      "title": "\u05d0\u05d9\u05e9\u05d5\u05e8 \u05ea\u05e9\u05dc\u05d5\u05dd (\u05e7\u05d5\u05d1\u05e5)"
     },
     "total_referrals": {
       "type": "number",

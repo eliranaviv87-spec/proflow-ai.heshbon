@@ -28,6 +28,8 @@ export function useSubscription() {
   const tokensUsed = subscription?.tokens_consumed_this_month || 0;
   const tokensLimit = currentLimits.tokens;
   const tokenPercent = tokensLimit > 0 ? Math.min(100, (tokensUsed / tokensLimit) * 100) : 0;
+  const aiCreditsBalance = subscription?.ai_credits_balance ?? 1; // default 1 = not depleted
+  const hasCredits = aiCreditsBalance > 0;
 
   return {
     subscription,
@@ -37,7 +39,9 @@ export function useSubscription() {
     tokensUsed,
     tokensLimit,
     tokenPercent,
-    canUseAI: currentLimits.ai,
+    canUseAI: currentLimits.ai && hasCredits,
+    hasCredits,
+    aiCreditsBalance,
     isDiscovery: plan === "Discovery",
   };
 }

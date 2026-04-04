@@ -30,6 +30,19 @@ function generateRefCode(name) {
 export default function AmbassadorProgram() {
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", sales_experience: false, sales_description: "", tos_agreed: false, elite_tos_agreed: false });
+  const [proofFile, setProofFile] = useState(null);
+  const [proofUrl, setProofUrl] = useState("");
+  const [uploadingProof, setUploadingProof] = useState(false);
+
+  const handleProofUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setProofFile(file);
+    setUploadingProof(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setProofUrl(file_url);
+    setUploadingProof(false);
+  };
   const [step, setStep] = useState("select"); // select | form | success
   const [submitting, setSubmitting] = useState(false);
   const [refCode, setRefCode] = useState("");
@@ -46,6 +59,7 @@ export default function AmbassadorProgram() {
     if (!form.full_name || !form.email || !form.phone) { setError("יש למלא את כל השדות החובה"); return; }
     if (!form.tos_agreed) { setError("יש לאשר את תנאי השירות"); return; }
     if (selectedTrack === "elite" && !form.elite_tos_agreed) { setError("יש לאשר את תנאי תוכנית השגרירים"); return; }
+    if (selectedTrack === "elite" && !proofUrl) { setError("יש להעלות אישור תשלום למסלול Elite"); return; }
 
     setSubmitting(true);
     setError("");
@@ -55,6 +69,7 @@ export default function AmbassadorProgram() {
       track: selectedTrack,
       status: selectedTrack === "elite" ? "pending" : "approved",
       ref_code: code,
+      proof_of_payment_url: proofUrl || undefined,
     });
     setRefCode(code);
     setStep("success");
@@ -256,9 +271,25 @@ export default function AmbassadorProgram() {
                 </div>
 
                 {selectedTrack === "elite" && (
-                  <div className="p-3 rounded-xl text-xs" style={{ background: "rgba(255,171,0,0.06)", border: "1px solid rgba(255,171,0,0.15)", color: "rgba(255,255,255,0.5)" }}>
-                    💳 הכרטיס יתפס כ-Pre-Authorization ויחויב ב-₪299 רק לאחר אישור אישי של הנהלת ProFlow AI
-                  </div>
+                  <>
+                    <div>
+                      <label className="block text-xs mb-1.5" style={{ color: "rgba(255,171,0,0.8)" }}>אישור תשלום (Pre-Auth) — חובה *</label>
+                      <p className="text-xs mb-2" style={{ color: "rgba(255,255,255,0.35)" }}>העלה צילום מסך/אסמכתא של אמצעי התשלום</p>
+                      <label style={{ display: "block", padding: "14px", borderRadius: 12, background: "rgba(255,171,0,0.06)", border: `2px dashed ${proofUrl ? "rgba(74,222,128,0.4)" : "rgba(255,171,0,0.25)"}`, cursor: "pointer", textAlign: "center" }}>
+                        <input type="file" accept="image/*,.pdf" onChange={handleProofUpload} style={{ display: "none" }} />
+                        {uploadingProof ? (
+                          <span style={{ fontSize: 13, color: "#FFAB00" }}>מעלה...</span>
+                        ) : proofUrl ? (
+                          <span style={{ fontSize: 13, color: "#4ade80" }}>✓ {proofFile?.name} — הועלה בהצלחה</span>
+                        ) : (
+                          <span style={{ fontSize: 13, color: "rgba(255,171,0,0.7)" }}>📎 לחץ להעלאת קובץ (תמונה / PDF)</span>
+                        )}
+                      </label>
+                    </div>
+                    <div className="p-3 rounded-xl text-xs" style={{ background: "rgba(255,171,0,0.06)", border: "1px solid rgba(255,171,0,0.15)", color: "rgba(255,255,255,0.5)" }}>
+                      💳 הכרטיס יתפס כ-Pre-Authorization ויחויב ב-₪299 רק לאחר אישור אישי של הנהלת ProFlow AI
+                    </div>
+                  </>
                 )}
 
                 {error && (

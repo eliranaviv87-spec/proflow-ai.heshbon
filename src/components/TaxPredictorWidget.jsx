@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { AlertTriangle, Sparkles, RefreshCw, TrendingUp, Zap } from "lucide-react";
+import { AlertTriangle, Sparkles, RefreshCw, TrendingUp, Zap, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 
 const fmt = (n) => new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(n || 0);
 
@@ -8,6 +9,36 @@ export default function TaxPredictorWidget({ totalIncome, totalExpenses, vatOwed
   const [advice, setAdvice] = useState("");
   const [loading, setLoading] = useState(false);
   const [shown, setShown] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const exportCSV = async () => {
+    setExporting(true);
+    const docs = await base44.entities.Document.list("-created_date", 500);
+    const now = new Date();
+    const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const rows = docs.map(d => ({
+      "ספק": d.supplier_name || "",
+      "תאריך הנפקה": d.date_issued || "",
+      "מספר מסמך": d.doc_number || "",
+      "סוג": d.doc_type === "income" ? "הכנסה" : "הוצאה",
+      "סכום כולל": d.total_amount || 0,
+      "מע\"מ": d.vat_amount || 0,
+      "סכום נטו": d.net_amount || 0,
+      "קטגוריה": d.ai_category || "",
+      "סטטוס": d.status || "",
+    }));
+    rows.push({});
+    rows.push({ "ספק": "סיכום תקופה", "תאריך הנפקה": period });
+    rows.push({ "ספק": "סה\"כ הכנסות", "סכום כולל": totalIncome });
+    rows.push({ "ספק": "סה\"כ הוצאות", "סכום כולל": totalExpenses });
+    rows.push({ "ספק": 'מע"מ לתשלום (נטו)', "סכום כולל": vatOwed });
+    rows.push({ "ספק": "מקדמת מס הכנסה", "סכום כולל": incomeTax });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "ריכוז נתונים");
+    XLSX.writeFile(wb, `proflow-tax-summary-${period}.xlsx`);
+    setExporting(false);
+  };
 
   const getSmartAdvice = async () => {
     setLoading(true);
@@ -81,6 +112,20 @@ export default function TaxPredictorWidget({ totalIncome, totalExpenses, vatOwed
           <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>כיסוי הכנסה: {vatCoverage}%</span>
         </div>
       </div>
+
+      {/* Export Button */}
+      <button
+        onClick={exportCSV}
+        disabled={exporting}
+        style={{
+          width: "100%", padding: "11px", borderRadius: 14, border: "1px solid rgba(0,229,255,0.25)", cursor: exporting ? "not-allowed" : "pointer",
+          background: "rgba(0,229,255,0.06)", color: "#00E5FF", fontWeight: 700, fontSize: 13,
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 10,
+        }}
+      >
+        {exporting ? <RefreshCw size={14} className="animate-spin" /> : <Download size={14} />}
+        {exporting ? "מייצא..." : 'הורד דו"ח ריכוז נתונים (Excel)'}
+      </button>
 
       {/* Smart Advice Button */}
       <button

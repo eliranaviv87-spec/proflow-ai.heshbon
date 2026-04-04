@@ -400,6 +400,12 @@ export default function AdminPanel() {
                         ניסיון מכירות: {app.sales_description}
                       </p>
                     )}
+                    {app.proof_of_payment_url && (
+                      <a href={app.proof_of_payment_url} target="_blank" rel="noopener noreferrer"
+                        style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 8, fontSize: 12, color: "#D4AF37", background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.25)", padding: "5px 12px", borderRadius: 8, textDecoration: "none" }}>
+                        📎 צפה באישור תשלום
+                      </a>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => approveElite(app)} style={{ padding: "8px 18px", borderRadius: 10, background: "rgba(74,222,128,0.15)", color: "#4ade80", border: "1px solid rgba(74,222,128,0.3)", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
