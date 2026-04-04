@@ -80,8 +80,8 @@ export default function Footer() {
             <a href="/ambassador-program" style={{ color: "rgba(212,175,55,0.9)", fontSize: 13, textDecoration: "none", fontWeight: 700, border: "1px solid rgba(212,175,55,0.3)", padding: "5px 12px", borderRadius: 8, background: "rgba(212,175,55,0.06)" }}>🔥 תוכנית שגרירים מוגבלת — הצטרפות לסיירת</a>
             <Link to="/terms" style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, textDecoration: "none" }}>תנאי שימוש</Link>
             <Link to="/privacy" style={{ color: "rgba(255,255,255,0.45)", fontSize: 13, textDecoration: "none" }}>מדיניות פרטיות</Link>
-            <Link to="/tos-business" style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, textDecoration: "none" }}>תנאי שימוש עסקי</Link>
-            <Link to="/tos-ambassador" style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, textDecoration: "none" }}>הסכם שגריר עלית</Link>
+            <Link to="/business-tos" style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, textDecoration: "none" }}>תנאי שימוש עסקי</Link>
+            <Link to="/ambassador-elite-contract" style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, textDecoration: "none" }}>הסכם שגריר עלית</Link>
             <Link to="/" style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, textDecoration: "none" }}>כניסה למערכת</Link>
           </div>
         </div>
