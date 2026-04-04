@@ -35,7 +35,7 @@ export default function Layout() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.data?.role === "admin";
 
   const mobileNavItems = [
     { path: "/", label: "דשבורד", icon: LayoutDashboard },
