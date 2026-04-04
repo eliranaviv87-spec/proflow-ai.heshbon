@@ -11,7 +11,7 @@ import Vault from './pages/Vault';
 import Banking from './pages/Banking';
 import AIReports from './pages/AIReports';
 import Settings from './pages/Settings';
-import Landing from './pages/Landing';
+import Landing from './pages/Landing.jsx';
 import Affiliates from './pages/Affiliates';
 import TaxReports from './pages/TaxReports';
 import Integrations from './pages/Integrations';
