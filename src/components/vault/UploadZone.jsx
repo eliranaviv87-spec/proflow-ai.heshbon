@@ -1,15 +1,17 @@
 import { useCallback, useState } from "react";
-import { Upload, FileText, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, Loader2, Camera } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import CameraCapture from "./CameraCapture";
 
 export default function UploadZone({ onDocumentCreated }) {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [currentFile, setCurrentFile] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
-  const [bulkProgress, setBulkProgress] = useState(null); // {done, total, errors}
+  const [bulkProgress, setBulkProgress] = useState(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
 
   const processFile = useCallback(async (file) => {
     setUploading(true);
@@ -117,6 +119,13 @@ export default function UploadZone({ onDocumentCreated }) {
   }, [processBulk]);
 
   return (
+    <>
+    {cameraOpen && (
+      <CameraCapture
+        onCapture={(file) => processFile(file)}
+        onClose={() => setCameraOpen(false)}
+      />
+    )}
     <div
       onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
       onDragLeave={() => setDragging(false)}
@@ -172,8 +181,16 @@ export default function UploadZone({ onDocumentCreated }) {
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">PDF, PNG, JPG • קובץ אחד או מספר קבצים בו-זמנית</p>
           </div>
+          {/* Camera button */}
+          <button
+            onClick={(e) => { e.stopPropagation(); setCameraOpen(true); }}
+            style={{ marginTop: 4, display: "flex", alignItems: "center", gap: 6, padding: "8px 18px", borderRadius: 12, background: "rgba(0,229,255,0.08)", border: "1px solid rgba(0,229,255,0.2)", color: "#00E5FF", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
+          >
+            <Camera size={14} /> צלם חשבונית ישירות
+          </button>
         </div>
       )}
     </div>
+    </>
   );
 }
