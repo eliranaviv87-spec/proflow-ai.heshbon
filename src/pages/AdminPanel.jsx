@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { Crown, Users, Building2, FileText, TrendingUp, RefreshCw, Ticket, Clock, CheckCircle, AlertCircle, DollarSign, Star, Link2 } from "lucide-react";
+import ManageAdmins from "../components/admin/ManageAdmins";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(n || 0);
@@ -65,6 +66,7 @@ export default function AdminPanel() {
     { id: "tickets", label: `פניות (${tickets.filter(t => t.status === "Open").length})` },
     { id: "affiliates", label: `שגרירים (${affiliates.length})` },
     { id: "users", label: `משתמשים (${users.length})` },
+    { id: "admins", label: "ניהול מנהלים" },
   ];
 
   if (loading) {
@@ -301,6 +303,10 @@ export default function AdminPanel() {
           </table>
         </div>
       </div>
+      )}
+
+      {activeTab === "admins" && (
+        <ManageAdmins />
       )}
     </div>
   );
