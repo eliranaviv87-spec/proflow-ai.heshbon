@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Clock, Sparkles } from "lucide-react";
+import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Clock, Sparkles, RefreshCw } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import AIAdviceModal from "../components/AIAdviceModal";
+import AiSmartSummary from "../components/AiSmartSummary";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(n || 0);
@@ -67,15 +68,18 @@ export default function Dashboard() {
   }));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Welcome */}
       <div>
-        <h1 className="text-2xl font-bold text-white mb-1">המיליונים שלך עובדים בשבילך. הנה תמונת המצב.</h1>
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>עדכון אחרון: {new Date().toLocaleDateString("he-IL")}</p>
+        <h1 className="text-xl md:text-2xl font-bold text-white mb-1">המיליונים שלך עובדים בשבילך. הנה תמונת המצב.</h1>
+        <p className="text-xs md:text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>עדכון אחרון: {new Date().toLocaleDateString("he-IL")}</p>
       </div>
 
+      {/* AI Smart Summary */}
+      <AiSmartSummary totalIncome={totalIncome} totalExpenses={totalExpenses} vatOwed={vatOwed} docsCount={docs.length} />
+
       {/* Stats Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard title="הכנסות" value={formatCurrency(totalIncome)} sub={`${income.length} מסמכים`} color="#00E5FF" glow="neon-glow-cyan" icon={TrendingUp} />
         <StatCard title="הוצאות" value={formatCurrency(totalExpenses)} sub={`${expenses.length} מסמכים`} color="#ff6b6b" icon={TrendingDown} />
         <StatCard title='מע"מ לתשלום' value={formatCurrency(vatOwed)} sub="חבות מס בזמן אמת" color="#FFAB00" glow="neon-glow-amber" icon={AlertTriangle} />
