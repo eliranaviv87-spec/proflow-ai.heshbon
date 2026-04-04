@@ -113,8 +113,11 @@ export default function Vault() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-1">הכספת</h1>
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>מרכז ניהול מסמכים חכם</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <h1 className="text-2xl font-bold text-white mb-1">הכספת</h1>
+          <span title="העלה כאן עד 50 קבצים לסריקה אוטומטית — AI מחלץ תאריך, סכום ומע&quot;מ אוטומטית" style={{ cursor: "help", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, borderRadius: "50%", background: "rgba(0,229,255,0.1)", border: "1px solid rgba(0,229,255,0.3)", color: "#00E5FF", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>?</span>
+        </div>
+        <p className="text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>מרכז ניהול מסמכים חכם — Bulk OCR עד 50 קבצים</p>
       </div>
 
       {/* Upload Zone */}

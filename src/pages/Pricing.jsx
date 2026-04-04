@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { base44 } from "@/api/base44Client";
 import { Link } from "react-router-dom";
 import { Check, Zap, Brain, Building2, Star, Clock } from "lucide-react";
 import Footer from "../components/Footer";
@@ -79,6 +80,12 @@ const getPlans = (isAnnual) => {
 
 export default function Pricing() {
   const [isAnnual, setIsAnnual] = useState(true);
+
+  useEffect(() => {
+    base44.auth.isAuthenticated().then(authed => {
+      if (authed) window.location.href = "/dashboard";
+    });
+  }, []);
   const plans = getPlans(isAnnual);
 
   return (
@@ -92,9 +99,9 @@ export default function Pricing() {
             </div>
             <span style={{ fontWeight: 900, fontSize: 20, color: "#fff" }}>ProFlow<span style={{ color: "#00E5FF" }}>AI</span></span>
           </Link>
-          <Link to="/" style={{ background: "linear-gradient(135deg, #D4AF37, #00E5FF)", color: "#0A0A0A", padding: "9px 22px", borderRadius: 12, fontSize: 14, fontWeight: 800, textDecoration: "none" }}>
+          <button onClick={() => base44.auth.redirectToLogin('/dashboard')} style={{ background: "linear-gradient(135deg, #D4AF37, #00E5FF)", color: "#0A0A0A", padding: "9px 22px", borderRadius: 12, fontSize: 14, fontWeight: 800, border: "none", cursor: "pointer" }}>
             כניסה למערכת
-          </Link>
+          </button>
         </div>
       </nav>
 
@@ -172,7 +179,7 @@ export default function Pricing() {
                   </div>
                 ))}
               </div>
-              <Link to="/dashboard" style={{
+              <Link to={'/checkout?plan=' + name} style={{
                 display: "block", textAlign: "center",
                 background: popular ? `linear-gradient(135deg, ${color}, #00E5FF)` : `${color}18`,
                 color: popular ? "#0A0A0A" : color,

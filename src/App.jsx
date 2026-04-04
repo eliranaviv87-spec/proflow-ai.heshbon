@@ -26,6 +26,7 @@ import AmbassadorDashboard from './pages/AmbassadorDashboard';
 import BusinessCustomerTOS from './pages/BusinessCustomerTOS';
 import AmbassadorEliteContract from './pages/AmbassadorEliteContract';
 import Pricing from './pages/Pricing';
+import Checkout from './pages/Checkout';
 import AICreditStore from './pages/AICreditStore';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
@@ -54,6 +55,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/pricing" element={<Pricing />} />
+      <Route path="/checkout" element={<Checkout />} />
       <Route path="/ambassador-program" element={<AmbassadorProgram />} />
       <Route path="/ambassador-dashboard" element={<AmbassadorDashboard />} />
       <Route path="/business-tos" element={<BusinessCustomerTOS />} />

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Zap, Shield, TrendingUp, FileText, Brain, ArrowLeft, Star, Check, MessageCircle, Phone, Mail, MapPin } from "lucide-react";
 import PricingTable from "../components/PricingTable";
 import Footer from "../components/Footer";
+import { base44 } from "@/api/base44Client";
 
 const features = [
   { icon: Brain, title: "AI פיננסי חכם", desc: "ניתוח אוטומטי של מסמכים, קטגוריזציה והמלצות מס בזמן אמת", color: "#00E5FF" },
@@ -47,6 +48,12 @@ function LiveCounter() {
 }
 
 export default function Landing() {
+  useEffect(() => {
+    base44.auth.isAuthenticated().then(authed => {
+      if (authed) window.location.href = "/dashboard";
+    });
+  }, []);
+
   return (
     <div dir="rtl" style={{ background: "#0A0A0A", minHeight: "100vh", color: "#fff", fontFamily: "Heebo, sans-serif" }}>
       <style>{`
@@ -67,9 +74,9 @@ export default function Landing() {
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <a href="/pricing" style={{ color: "rgba(0,229,255,0.8)", fontSize: 13, textDecoration: "none", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(0,229,255,0.2)", background: "rgba(0,229,255,0.06)" }}>💰 מחירים</a>
             <a href="/ambassador-program" style={{ color: "rgba(212,175,55,0.85)", fontSize: 13, textDecoration: "none", padding: "6px 12px", borderRadius: 8, border: "1px solid rgba(212,175,55,0.2)", background: "rgba(212,175,55,0.06)" }}>🔥 סיירת שגרירים</a>
-            <Link to="/dashboard" style={{ background: "linear-gradient(135deg, #D4AF37, #00E5FF)", color: "#0A0A0A", padding: "9px 22px", borderRadius: 12, fontSize: 14, fontWeight: 800, textDecoration: "none" }}>
+            <button onClick={() => base44.auth.redirectToLogin('/dashboard')} style={{ background: "linear-gradient(135deg, #D4AF37, #00E5FF)", color: "#0A0A0A", padding: "9px 22px", borderRadius: 12, fontSize: 14, fontWeight: 800, border: "none", cursor: "pointer" }}>
               כניסה למערכת
-            </Link>
+            </button>
           </div>
         </div>
       </nav>

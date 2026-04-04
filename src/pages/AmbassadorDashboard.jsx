@@ -97,7 +97,10 @@ export default function AmbassadorDashboard() {
             <div style={{ width: 38, height: 38, borderRadius: 12, background: "rgba(212,175,55,0.15)", border: "1px solid rgba(212,175,55,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Star size={18} style={{ color: "#D4AF37" }} />
             </div>
-            <h1 className="text-2xl font-bold text-white">לוח מחוונים — שגריר</h1>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <h1 className="text-2xl font-bold text-white">לוח מחוונים — שגריר</h1>
+              <span title="כאן תוכל לעקוב אחר ההפניות שלך, לראות עמלות, לבקש תשלום ולשתף את קישור ההפניה הייחודי שלך." style={{ cursor: "help", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, borderRadius: "50%", background: "rgba(212,175,55,0.12)", border: "1px solid rgba(212,175,55,0.3)", color: "#D4AF37", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>?</span>
+            </div>
             <span style={{ fontSize: 12, padding: "3px 10px", borderRadius: 50, background: isElite ? "rgba(212,175,55,0.15)" : "rgba(0,229,255,0.1)", color: isElite ? "#D4AF37" : "#00E5FF", border: `1px solid ${isElite ? "rgba(212,175,55,0.3)" : "rgba(0,229,255,0.2)"}`, fontWeight: 700 }}>
               {isElite ? "⭐ Elite" : "Casual Partner"}
             </span>

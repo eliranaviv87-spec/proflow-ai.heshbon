@@ -76,7 +76,10 @@ export default function TaxPredictorWidget({ totalIncome, totalExpenses, vatOwed
             <AlertTriangle size={17} color="#FFAB00" />
           </div>
           <div>
-            <p style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>מנוע חיזוי מס — Tax Predictor AI</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <p style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>מנוע חיזוי מס — Tax Predictor AI</p>
+              <span title="חיזוי מע&quot;מ ומס הכנסה בזמן אמת על סמך הנתונים שלך. הנתונים מתעדכנים אוטומטית בכל העלאת מסמך." style={{ cursor: "help", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 18, height: 18, borderRadius: "50%", background: "rgba(255,171,0,0.12)", border: "1px solid rgba(255,171,0,0.3)", color: "#FFAB00", fontSize: 11, fontWeight: 700, flexShrink: 0 }}>?</span>
+            </div>
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>מבוסס על מסמכים שהועלו</p>
           </div>
         </div>
