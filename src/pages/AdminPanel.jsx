@@ -68,8 +68,37 @@ export default function AdminPanel() {
   const pendingAffiliatePayouts = affiliates.reduce((s, a) => s + (a.pending_payout || 0), 0);
 
   const approveElite = async (app) => {
-    await base44.entities.AmbassadorApplication.update(app.id, { status: "active" });
-    setEliteApps(prev => prev.filter(a => a.id !== app.id));
+    try {
+      // Generate unique ref_code
+      const refCode = "AMB-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+      // Update ambassador application to approved/active
+      await base44.entities.AmbassadorApplication.update(app.id, { status: "active", ref_code: refCode });
+
+      // Create or update Affiliate record
+      const existingAffiliates = await base44.entities.Affiliate.filter({ ref_code: refCode });
+      if (!existingAffiliates || existingAffiliates.length === 0) {
+        await base44.entities.Affiliate.create({
+          ref_code: refCode,
+          total_commission: 0,
+          pending_payout: 0,
+          referral_count: 0,
+          is_active: true,
+        });
+      }
+
+      // Send notification to ambassador
+      await base44.entities.Notification.create({
+        type: "system",
+        title: "בקשתך אושרה!",
+        message: `ברכות! בקשתך לתוכנית השגרירים אושרה. קוד ההפנייה שלך: ${refCode}`,
+        severity: "info",
+      });
+
+      setEliteApps(prev => prev.filter(a => a.id !== app.id));
+    } catch (err) {
+      console.error("approveElite error:", err);
+    }
   };
 
   const rejectElite = async (app) => {

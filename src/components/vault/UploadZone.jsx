@@ -8,12 +8,31 @@ import CameraCapture from "./CameraCapture";
 export default function UploadZone({ onDocumentCreated }) {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [creditsBlocked, setCreditsBlocked] = useState(false);
+  const [showCreditsPopup, setShowCreditsPopup] = useState(false);
   const [currentFile, setCurrentFile] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
   const [bulkProgress, setBulkProgress] = useState(null);
   const [cameraOpen, setCameraOpen] = useState(false);
 
+  const checkCredits = async () => {
+    try {
+      const user = await base44.auth.me();
+      const subs = await base44.entities.Subscription.filter({ user_email: user.email, status: "active" });
+      if (subs && subs.length > 0) {
+        const sub = subs[0];
+        if (sub.ai_credits_balance !== undefined && sub.ai_credits_balance <= 0 && sub.tokens_limit && sub.tokens_consumed_this_month >= sub.tokens_limit) {
+          setCreditsBlocked(true);
+          return false;
+        }
+      }
+    } catch {}
+    return true;
+  };
+
   const processFile = useCallback(async (file) => {
+    const hasCredits = await checkCredits();
+    if (!hasCredits) { setShowCreditsPopup(true); return; }
     setUploading(true);
     setCurrentFile(file.name);
     setStatusMsg("מעלה קובץ...");
@@ -120,6 +139,19 @@ export default function UploadZone({ onDocumentCreated }) {
 
   return (
     <>
+    {showCreditsPopup && (
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ background: "#111114", border: "1px solid rgba(255,171,0,0.3)", borderRadius: 20, padding: 32, maxWidth: 380, textAlign: "center" }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>⚡</div>
+          <h3 style={{ color: "#FFAB00", fontWeight: 900, fontSize: 20, marginBottom: 10 }}>נגמרו קרדיטי ה-AI</h3>
+          <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>על מנת להמשיך לעבד מסמכים עם OCR, יש לרכוש קרדיטי AI נוספים.</p>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+            <a href="/ai-credits" style={{ padding: "11px 24px", borderRadius: 12, background: "linear-gradient(135deg, #D4AF37, #FFAB00)", color: "#0A0A0A", fontWeight: 800, fontSize: 14, textDecoration: "none" }}>רכוש קרדיטים</a>
+            <button onClick={() => setShowCreditsPopup(false)} style={{ padding: "11px 20px", borderRadius: 12, background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.1)", fontSize: 14, cursor: "pointer" }}>סגור</button>
+          </div>
+        </div>
+      </div>
+    )}
     {cameraOpen && (
       <CameraCapture
         onCapture={(file) => processFile(file)}
