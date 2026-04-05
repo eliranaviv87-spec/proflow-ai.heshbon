@@ -39,18 +39,36 @@ const StatusBadge = ({ status }) => {
 export default function Dashboard() {
   const [docs, setDocs] = useState([]);
   const [txs, setTxs] = useState([]);
+  const [org, setOrg] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      base44.entities.Document.list("-created_date", 50),
-      base44.entities.BankTransaction.list("-date", 100),
-    ]).then(([d, t]) => {
-      setDocs(d);
-      setTxs(t);
-      setLoading(false);
+    const fetchData = async () => {
+      try {
+        const [d, t, orgs] = await Promise.all([
+          base44.entities.Document.list("-created_date", 50),
+          base44.entities.BankTransaction.list("-date", 100),
+          base44.entities.Organization.list(),
+        ]);
+        setDocs(d);
+        setTxs(t);
+        if (orgs && orgs.length > 0) setOrg(orgs[0]);
+      } catch (err) {
+        console.error("Dashboard fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+
+    // Real-time sync for Organization changes
+    const unsubscribe = base44.entities.Organization.subscribe((event) => {
+      if (event.type === "update" || event.type === "create") {
+        setOrg(event.data);
+      }
     });
+    return () => unsubscribe();
   }, []);
 
   const income = docs.filter(d => d.doc_type === "income");

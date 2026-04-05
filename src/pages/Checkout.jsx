@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { base44 } from "@/api/base44Client";
 import { Zap, Check, Shield, ArrowLeft } from "lucide-react";
 
 const planDetails = {
@@ -20,10 +21,36 @@ export default function Checkout() {
 
   const handlePayment = async () => {
     setLoading(true);
-    // Simulated payment — Tranzila integration coming soon
-    await new Promise(r => setTimeout(r, 2000));
-    setPaid(true);
-    setTimeout(() => navigate("/dashboard"), 2500);
+    try {
+      // Simulated payment — Tranzila integration coming soon
+      await new Promise(r => setTimeout(r, 2000));
+
+      // Post-purchase: update organization subscription_tier
+      const orgs = await base44.entities.Organization.list();
+      if (orgs && orgs.length > 0) {
+        await base44.entities.Organization.update(orgs[0].id, { subscription_tier: planName });
+      }
+
+      // Create active subscription record
+      const user = await base44.auth.me();
+      const today = new Date().toISOString().split("T")[0];
+      const endDate = new Date();
+      endDate.setFullYear(endDate.getFullYear() + 1);
+      await base44.entities.Subscription.create({
+        user_email: user.email,
+        plan_name: planName,
+        status: "active",
+        billing_cycle: "annual",
+        start_date: today,
+        end_date: endDate.toISOString().split("T")[0],
+      });
+
+      setPaid(true);
+      setTimeout(() => navigate("/dashboard"), 2500);
+    } catch (err) {
+      console.error("Payment error:", err);
+      setLoading(false);
+    }
   };
 
   return (
