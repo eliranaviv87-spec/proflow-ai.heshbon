@@ -56,8 +56,6 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/ambassador-program" element={<AmbassadorProgram />} />
@@ -89,14 +87,20 @@ const AuthenticatedApp = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClientInstance}>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/*" element={
+            <AuthProvider>
+              <AuthenticatedApp />
+            </AuthProvider>
+          } />
+        </Routes>
+      </Router>
+      <Toaster />
+    </QueryClientProvider>
   )
 }
 
