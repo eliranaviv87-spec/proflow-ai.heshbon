@@ -35,7 +35,7 @@ export default function Login() {
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.message || '\u05DB\u05E9\u05DC \u05D1\u05D4\u05EA\u05D7\u05D1\u05E8\u05D5\u05EA. \u05D1\u05D3\u05D5\u05E7 \u05D0\u05EA \u05D4\u05E4\u05E8\u05D8\u05D9\u05DD \u05E9\u05DC\u05DA.');
+      setError(err.message || 'כשל בהתחברות. בדוק את הפרטים שלך.');
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +49,7 @@ export default function Login() {
       });
     } catch (err) {
       console.error('Google login error:', err);
-      setError('\u05DB\u05E9\u05DC \u05D1\u05D4\u05EA\u05D7\u05D1\u05E8\u05D5\u05EA \u05D3\u05E8\u05DA Google');
+      setError('כשל בהתחברות דרך Google');
       setIsLoading(false);
     }
   };
@@ -68,17 +68,17 @@ export default function Login() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">ProFlow AI</h1>
-          <p className="text-slate-400">\u05DE\u05E2\u05E8\u05DB\u05EA \u05D4\u05E4\u05E2\u05DC\u05D4 \u05E4\u05D9\u05E0\u05E0\u05E1\u05D9\u05EA \u05DC\u05E2\u05E1\u05E7\u05D9\u05DD \u05DE\u05D5\u05D3\u05E8\u05E0\u05D9\u05D9\u05DD</p>
+          <p className="text-slate-400">מערכת הפעלה פיננסית לעסקים מודרניים</p>
         </div>
 
         <div className="bg-slate-800 rounded-lg shadow-xl p-8 border border-slate-700">
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">\u05DB\u05EA\u05D5\u05D1\u05EA \u05D0\u05D9\u05DE\u05D9\u05D9\u05DC</label>
+              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">כתובת אימייל</label>
               <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition text-right" />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">\u05E1\u05D9\u05E1\u05DE\u05D0</label>
+              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">סיסמא</label>
               <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="........" required className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition text-right" />
             </div>
 
@@ -89,7 +89,7 @@ export default function Login() {
             )}
 
             <button type="submit" disabled={isLoading} className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
-              {isLoading ? '\u05DE\u05EA\u05D7\u05D1\u05E8...' : '\u05DB\u05E0\u05D9\u05E1\u05D4'}
+              {isLoading ? 'מתחבר...' : 'כניסה'}
             </button>
           </form>
 
@@ -98,7 +98,7 @@ export default function Login() {
               <div className="w-full border-t border-slate-600"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-slate-800 text-slate-400">\u05D0\u05D5</span>
+              <span className="px-2 bg-slate-800 text-slate-400">או</span>
             </div>
           </div>
 
@@ -109,7 +109,7 @@ export default function Login() {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            \u05DB\u05E0\u05D9\u05E1\u05D4 \u05E2\u05DD Google
+            כניסה עם Google
           </button>
 
           <div className="relative my-4">
@@ -117,17 +117,17 @@ export default function Login() {
               <div className="w-full border-t border-slate-600"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-slate-800 text-slate-400">\u05D0\u05D9\u05DF \u05DC\u05DA \u05D7\u05E9\u05D1\u05D5\u05DF?</span>
+              <span className="px-2 bg-slate-800 text-slate-400">אין לך חשבון?</span>
             </div>
           </div>
 
           <button type="button" onClick={handleSignUp} className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2 px-4 rounded-lg transition border border-slate-600">
-            \u05E6\u05D5\u05E8 \u05D7\u05E9\u05D1\u05D5\u05DF
+            צור חשבון
           </button>
         </div>
 
         <p className="text-center text-slate-400 text-sm mt-6">
-          \u05D1\u05DB\u05E0\u05D9\u05E1\u05D4, \u05D0\u05EA\u05D4 \u05DE\u05E1\u05DB\u05D9\u05DD \u05DC\u05EA\u05E0\u05D0\u05D9 \u05D4\u05E9\u05D9\u05E8\u05D5\u05EA \u05D5\u05DE\u05D3\u05D9\u05E0\u05D9\u05D5\u05EA \u05D4\u05E4\u05E8\u05D8\u05D9\u05D5\u05EA
+          בכניסה, אתה מסכים לתנאי השירות ומדיניות הפרטיות
         </p>
       </div>
     </div>
