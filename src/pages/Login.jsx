@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { useAuth } from '@/lib/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { navigateToLogin } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -54,33 +52,12 @@ export default function Login() {
         <div className="bg-slate-800 rounded-lg shadow-xl p-8 border border-slate-700">
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition"
-              />
+              <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+              <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition" />
             </div>
-
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="????????"
-                required
-                className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition"
-              />
+              <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">Password</label>
+              <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="........" required className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition" />
             </div>
 
             {error && (
@@ -89,11 +66,7 @@ export default function Login() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="submit" disabled={isLoading} className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-white font-semibold py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
@@ -107,11 +80,7 @@ export default function Login() {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleSignUp}
-            className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2 px-4 rounded-lg transition border border-slate-600"
-          >
+          <button type="button" onClick={handleSignUp} className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2 px-4 rounded-lg transition border border-slate-600">
             Create Account
           </button>
         </div>
