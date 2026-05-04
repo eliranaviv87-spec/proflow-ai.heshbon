@@ -17,16 +17,16 @@ export default function UploadZone({ onDocumentCreated }) {
 
   const checkCredits = async () => {
     try {
-      const user = await base44.auth.me();
-      const subs = await base44.entities.Subscription.filter({ user_email: user.email, status: "active" });
-      if (subs && subs.length > 0) {
-        const sub = subs[0];
-        if (sub.ai_credits_balance !== undefined && sub.ai_credits_balance <= 0 && sub.tokens_limit && sub.tokens_consumed_this_month >= sub.tokens_limit) {
-          setCreditsBlocked(true);
-          return false;
-        }
+      const response = await base44.functions.invoke('checkUserCredits', {});
+      if (!response.data?.allowed) {
+        setCreditsBlocked(true);
+        return false;
       }
-    } catch {}
+    } catch (err) {
+      console.error('Credit check failed:', err);
+      setCreditsBlocked(true);
+      return false;
+    }
     return true;
   };
 
@@ -66,6 +66,15 @@ export default function UploadZone({ onDocumentCreated }) {
             category_tag: { type: "string" },
           },
         },
+      });
+
+      // Log token usage (estimate: 500 tokens per OCR)
+      const user = await base44.auth.me();
+      await base44.functions.invoke('logTokenUsage', {
+        user_email: user.email,
+        tokens_used: 500,
+        operation_type: 'OCR_EXTRACTION',
+        document_id: doc.id,
       });
 
       // Validate amounts

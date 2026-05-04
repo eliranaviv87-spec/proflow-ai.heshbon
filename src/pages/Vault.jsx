@@ -25,6 +25,21 @@ export default function Vault() {
 
   const processFile = async (file) => {
     if (!file) return;
+    
+    // Check credits first
+    try {
+      const creditCheck = await base44.functions.invoke('checkUserCredits', {});
+      if (!creditCheck.data?.allowed) {
+        setUploading(false);
+        alert('❌ ' + (creditCheck.data?.reason || 'לא ניתן לעבד. קנה קרדיטים או שדרג חבילה'));
+        return;
+      }
+    } catch (err) {
+      setUploading(false);
+      alert('שגיאה בבדיקת קרדיטים');
+      return;
+    }
+
     setUploading(true);
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
 
@@ -52,6 +67,15 @@ export default function Vault() {
           doc_type: { type: "string" },
         },
       },
+    });
+
+    // Log token usage
+    const user = await base44.auth.me();
+    await base44.functions.invoke('logTokenUsage', {
+      user_email: user.email,
+      tokens_used: 500,
+      operation_type: 'OCR_EXTRACTION',
+      document_id: doc.id,
     });
 
     const tolerance = 0.5;

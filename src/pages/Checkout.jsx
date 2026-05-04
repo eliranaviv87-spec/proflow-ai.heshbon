@@ -22,31 +22,19 @@ export default function Checkout() {
   const handlePayment = async () => {
     setLoading(true);
     try {
-      // Simulated payment — Tranzila integration coming soon
-      await new Promise(r => setTimeout(r, 2000));
-
-      // Post-purchase: update organization subscription_tier
-      const orgs = await base44.entities.Organization.list();
-      if (orgs && orgs.length > 0) {
-        await base44.entities.Organization.update(orgs[0].id, { subscription_tier: planName });
-      }
-
-      // Create active subscription record
       const user = await base44.auth.me();
-      const today = new Date().toISOString().split("T")[0];
-      const endDate = new Date();
-      endDate.setFullYear(endDate.getFullYear() + 1);
-      await base44.entities.Subscription.create({
-        user_email: user.email,
+      
+      // Call backend to create Stripe checkout session
+      const response = await base44.functions.invoke('createCheckoutSession', {
         plan_name: planName,
-        status: "active",
-        billing_cycle: "annual",
-        start_date: today,
-        end_date: endDate.toISOString().split("T")[0],
+        user_email: user.email,
       });
 
-      setPaid(true);
-      setTimeout(() => navigate("/dashboard"), 2500);
+      if (response.data?.checkout_url) {
+        window.location.href = response.data.checkout_url;
+      } else {
+        throw new Error('Failed to create checkout session');
+      }
     } catch (err) {
       console.error("Payment error:", err);
       setLoading(false);
@@ -134,8 +122,8 @@ export default function Checkout() {
                   </div>
                 </div>
 
-                <div style={{ padding: "10px 14px", borderRadius: 12, background: "rgba(255,171,0,0.06)", border: "1px solid rgba(255,171,0,0.2)", marginBottom: 20, fontSize: 12, color: "rgba(255,171,0,0.8)", textAlign: "center" }}>
-                  🔄 חיבור לטרנזילה בתהליך — כרגע בסימולציה בלבד
+                <div style={{ padding: "10px 14px", borderRadius: 12, background: "rgba(0,229,255,0.06)", border: "1px solid rgba(0,229,255,0.2)", marginBottom: 20, fontSize: 12, color: "rgba(0,229,255,0.8)", textAlign: "center" }}>
+                  ✅ תשלום מאובטח דרך Stripe — הנתונים שלך מוצפנים
                 </div>
 
                 <button
