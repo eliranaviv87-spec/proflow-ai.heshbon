@@ -1,16 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
-/**
- * API Guard - Check if user has active subscription and credits
- * Called before: Document upload, AI processing, OCR
- * Returns: { allowed: boolean, reason?: string, subscription?: object }
- */
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    
-    // Get current user
     const user = await base44.auth.me();
+
     if (!user) {
       return Response.json({ allowed: false, reason: 'Not authenticated' }, { status: 401 });
     }
@@ -22,48 +16,36 @@ Deno.serve(async (req) => {
     });
 
     if (!subs || subs.length === 0) {
-      return Response.json({
-        allowed: false,
-        reason: 'No active subscription',
-        nextStep: '/pricing',
-      });
+      return Response.json({ allowed: false, reason: 'No active subscription' });
     }
 
-    const subscription = subs[0];
+    const sub = subs[0];
+    const isDiscovery = sub.plan_name === 'Discovery';
+    const discoveryExpired = isDiscovery && sub.discovery_expires_date && new Date(sub.discovery_expires_date) < new Date();
 
     // Check token limit
-    const tokensRemaining = subscription.tokens_limit - (subscription.tokens_consumed_this_month || 0);
-    
-    if (tokensRemaining <= 0) {
+    if (sub.tokens_limit && sub.tokens_consumed_this_month >= sub.tokens_limit) {
       return Response.json({
         allowed: false,
-        reason: 'Token limit exceeded',
-        tokensUsed: subscription.tokens_consumed_this_month,
-        tokensLimit: subscription.tokens_limit,
-        nextStep: '/ai-credits',
+        reason: `Reached monthly token limit (${sub.tokens_consumed_this_month}/${sub.tokens_limit})`,
       });
     }
 
-    // Check AI credits (if applicable)
-    if (subscription.ai_credits_balance !== undefined && subscription.ai_credits_balance <= 0) {
-      return Response.json({
-        allowed: false,
-        reason: 'No AI credits available',
-        nextStep: '/ai-credits',
-      });
+    // Check Discovery expiration
+    if (discoveryExpired) {
+      return Response.json({ allowed: false, reason: 'Discovery trial expired' });
     }
 
-    // Allow with remaining tokens info
+    // Check AI credits if add-on is depleted
+    if (sub.ai_credits_balance !== undefined && sub.ai_credits_balance < 0) {
+      return Response.json({ allowed: false, reason: 'AI credits depleted' });
+    }
+
+    // All checks passed
     return Response.json({
       allowed: true,
-      subscription: {
-        plan_name: subscription.plan_name,
-        status: subscription.status,
-        tokensRemaining,
-        tokensLimit: subscription.tokens_limit,
-        tokensUsed: subscription.tokens_consumed_this_month,
-        aiCreditsBalance: subscription.ai_credits_balance || 0,
-      },
+      remaining_tokens: Math.max(0, (sub.tokens_limit || Infinity) - (sub.tokens_consumed_this_month || 0)),
+      plan: sub.plan_name,
     });
   } catch (error) {
     console.error('Credit check error:', error.message);
