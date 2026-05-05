@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
+// Icon warning is from downstream components — not from this file
 import { base44 } from "@/api/base44Client";
-import { Crown, Users, Building2, FileText, TrendingUp, RefreshCw, Ticket, Clock, CheckCircle, AlertCircle, DollarSign, Star, Link2, Cpu, UserCheck } from "lucide-react";
+import { Crown, Users, Building2, FileText, TrendingUp, RefreshCw, Ticket, Clock, CheckCircle, AlertCircle, DollarSign, Star, Cpu, UserCheck, Activity, ShieldCheck } from "lucide-react";
 import ManageAdmins from "../components/admin/ManageAdmins";
+import CreditsManager from "../components/admin/CreditsManager";
+import SystemHealthDashboard from "../components/admin/SystemHealthDashboard";
+import QAChecklist from "../components/admin/QAChecklist";
+import PreLaunchAudit from "../components/admin/PreLaunchAudit";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(n || 0);
@@ -109,10 +114,14 @@ export default function AdminPanel() {
   const tabs = [
     { id: "overview", label: "סקירה כללית" },
     { id: "tokens", label: `טוקנים (${subscriptions.length})` },
-    { id: "elite", label: `בקשות Elite (${eliteApps.length})${eliteApps.length > 0 ? " 🔔" : ""}` },
+    { id: "credits", label: "ניהול קרדיטים" },
+    { id: "elite", label: `Elite (${eliteApps.length})${eliteApps.length > 0 ? " 🔔" : ""}` },
     { id: "tickets", label: `פניות (${tickets.filter(t => t.status === "Open").length})` },
     { id: "affiliates", label: `שגרירים (${affiliates.length})` },
     { id: "users", label: `משתמשים (${users.length})` },
+    { id: "health", label: "בריאות מערכת" },
+    { id: "qa", label: "QA Checklist" },
+    { id: "launch", label: "🚀 Pre-Launch Audit" },
     { id: "admins", label: "ניהול מנהלים" },
   ];
 
@@ -450,6 +459,24 @@ export default function AdminPanel() {
           </div>
         )}
       </div>
+      )}
+
+      {activeTab === "credits" && (
+        <CreditsManager />
+      )}
+
+      {activeTab === "health" && (
+        <SystemHealthDashboard />
+      )}
+
+      {activeTab === "qa" && (
+        <QAChecklist />
+      )}
+
+      {activeTab === "launch" && (
+        <div className="space-y-6">
+          <PreLaunchAudit />
+        </div>
       )}
 
       {activeTab === "admins" && (
