@@ -33,27 +33,33 @@ import TermsOfService from './pages/TermsOfService';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 
-const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-
-  if (isLoadingPublicSettings || isLoadingAuth) {
+const LayoutGuard = () => {
+  const { isAuthenticated, isLoadingAuth, isLoadingPublicSettings } = useAuth();
+  if (isLoadingAuth || isLoadingPublicSettings) {
     return (
       <div className="fixed inset-0 flex items-center justify-center" style={{ background: "#0A0A0C" }}>
         <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(0,229,255,0.2)", borderTopColor: "#00E5FF" }}></div>
       </div>
     );
   }
+  if (!isAuthenticated) {
+    window.location.href = '/login';
+    return null;
+  }
+  return <Layout />;
+};
 
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      return <Navigate to="/login" replace />;
-    }
+const AuthenticatedApp = () => {
+  const { authError } = useAuth();
+
+  // Only block on user_not_registered error — all other states render normally
+  if (authError?.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
   }
 
   return (
     <Routes>
+      {/* Public routes — no auth required */}
       <Route path="/" element={<Landing />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/checkout" element={<Checkout />} />
@@ -63,7 +69,8 @@ const AuthenticatedApp = () => {
       <Route path="/ambassador-elite-contract" element={<AmbassadorEliteContract />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
-      <Route element={<Layout />}>
+      {/* Protected routes — LayoutGuard handles auth check */}
+      <Route element={<LayoutGuard />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/vault" element={<Vault />} />
         <Route path="/banking" element={<Banking />} />
