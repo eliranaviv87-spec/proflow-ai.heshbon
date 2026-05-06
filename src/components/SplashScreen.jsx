@@ -177,13 +177,22 @@ export default function SplashScreen({ onDone }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const setSize = () => {
-      canvas.width = Math.min(window.innerWidth, 1000);
-      canvas.height = Math.min(window.innerHeight * 0.6, 500);
-    };
-    setSize();
+    canvas.width = Math.min(window.innerWidth, 1000);
+    canvas.height = Math.min(window.innerHeight * 0.6, 500);
 
     nextWord(WORDS[0], canvas);
+
+    const doneRef = { current: false };
+
+    const triggerDone = () => {
+      if (doneRef.current) return;
+      doneRef.current = true;
+      setFading(true);
+      setTimeout(onDone, 800);
+    };
+
+    // Safety: always exit after 16 seconds max
+    const safetyTimer = setTimeout(triggerDone, 16000);
 
     const animate = () => {
       const ctx = canvas.getContext("2d");
@@ -202,26 +211,27 @@ export default function SplashScreen({ onDone }) {
       }
 
       frameCountRef.current++;
-      // Change word every ~4s (240 frames at 60fps)
-      if (frameCountRef.current % 240 === 0) {
-        wordIndexRef.current = (wordIndexRef.current + 1) % WORDS.length;
-        nextWord(WORDS[wordIndexRef.current], canvas);
-
-        // After last word, start fading out
-        if (wordIndexRef.current === WORDS.length - 1) {
-          setTimeout(() => {
-            setFading(true);
-            setTimeout(onDone, 1000);
-          }, 3000);
+      // Change word every ~3s (180 frames)
+      if (frameCountRef.current % 180 === 0) {
+        wordIndexRef.current++;
+        if (wordIndexRef.current < WORDS.length) {
+          nextWord(WORDS[wordIndexRef.current], canvas);
+          // After last word shown for 3s, exit
+          if (wordIndexRef.current === WORDS.length - 1) {
+            setTimeout(triggerDone, 3000);
+          }
         }
       }
 
-      animationRef.current = requestAnimationFrame(animate);
+      if (!doneRef.current) {
+        animationRef.current = requestAnimationFrame(animate);
+      }
     };
 
     animate();
 
     return () => {
+      clearTimeout(safetyTimer);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
   }, []);
