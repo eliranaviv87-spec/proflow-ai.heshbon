@@ -1,6 +1,5 @@
 import { Toaster } from "@/components/ui/toaster"
 import { useState } from 'react';
-import SplashScreen from './components/SplashScreen';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
@@ -101,17 +100,12 @@ const AppRoutes = () => {
 };
 
 export default function App() {
-  const [splashDone, setSplashDone] = useState(false);
-
   return (
     <QueryClientProvider client={queryClientInstance}>
       <Router>
         <AuthProvider>
-          {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
-          <div style={{ display: splashDone ? 'block' : 'none' }}>
-            <AppRoutes />
-            <Toaster />
-          </div>
+          <AppRoutes />
+          <Toaster />
         </AuthProvider>
       </Router>
     </QueryClientProvider>
