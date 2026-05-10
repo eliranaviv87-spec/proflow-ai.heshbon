@@ -16,15 +16,53 @@ ProFlow AI - ידע תמיכה:
 - איך מחשבים מקדמות מס הכנסה? בהגדרות הזן את שיעור המקדמות שלך, המערכת מחשבת מההכנסות.
 `;
 
+// In-memory rate limiter
+const rateLimitMap = new Map();
+const RATE_LIMIT = 10; // 10 AI messages per minute per user
+const RATE_WINDOW_MS = 60 * 1000;
+
+function checkRateLimit(key) {
+  const now = Date.now();
+  const entry = rateLimitMap.get(key) || { count: 0, resetAt: now + RATE_WINDOW_MS };
+  if (now > entry.resetAt) {
+    entry.count = 0;
+    entry.resetAt = now + RATE_WINDOW_MS;
+  }
+  entry.count++;
+  rateLimitMap.set(key, entry);
+  return { allowed: entry.count <= RATE_LIMIT, remaining: Math.max(0, RATE_LIMIT - entry.count) };
+}
+
 Deno.serve(async (req) => {
   try {
+    if (req.method !== 'POST') {
+      return Response.json({ error: 'Method not allowed' }, { status: 405 });
+    }
+
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
+    // Rate limit: 10 requests/minute per user
+    const rl = checkRateLimit(`chat:${user.email}`);
+    if (!rl.allowed) {
+      return Response.json({ error: 'יותר מדי הודעות. נסה שוב בעוד דקה.' }, {
+        status: 429,
+        headers: { 'Retry-After': '60' }
+      });
+    }
+
     const { message, history = [] } = await req.json();
 
-    const conversationContext = history.slice(-6).map(m =>
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      return Response.json({ error: 'Message is required' }, { status: 400 });
+    }
+
+    // Sanitize: cap message length
+    const safeMessage = message.slice(0, 1000);
+    const safeHistory = history.slice(-6);
+
+    const conversationContext = safeHistory.map(m =>
       `${m.role === 'user' ? 'משתמש' : 'תמיכה'}: ${m.content}`
     ).join('\n');
 
@@ -36,7 +74,7 @@ ${FAQ_KNOWLEDGE_BASE}
 היסטוריית שיחה:
 ${conversationContext}
 
-שאלת המשתמש: ${message}
+שאלת המשתמש: ${safeMessage}
 
 אם אינך יכול לפתור את הבעיה מבסיס הידע, ענה בדיוק: "ESCALATE: [תיאור קצר של הבעיה]"
 אחרת ענה ישירות.`;
@@ -51,14 +89,22 @@ ${conversationContext}
       const ticket = await base44.entities.SupportTicket.create({
         user_email: user.email,
         user_name: user.full_name,
-        subject: message.slice(0, 100),
-        message,
+        subject: safeMessage.slice(0, 100),
+        message: safeMessage,
         status: "Open",
         priority: "Medium",
         sla_deadline: slaDeadline,
-        chat_history: JSON.stringify([...history, { role: 'user', content: message }]),
+        chat_history: JSON.stringify([...safeHistory, { role: 'user', content: safeMessage }]),
       });
       ticketId = ticket.id;
+
+      // Audit log escalation
+      await base44.asServiceRole.entities.AuditLog.create({
+        action: 'support_escalated',
+        entity_type: 'SupportTicket',
+        entity_id: ticket.id,
+        details: `Support escalated for user ${user.email}: ${safeMessage.slice(0, 200)}`,
+      });
     }
 
     return Response.json({
