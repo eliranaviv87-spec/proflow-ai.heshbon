@@ -20,7 +20,7 @@ const QA_SUITE = [
       { id: "qa-6", test: "Discovery expiry auto-upgrade", steps: "הגדר start_date לפני 3 חודשים → הרץ autoUpgradeDiscovery", expected: "plan_name=Starter + email נשלח", status: "pass" },
       { id: "qa-7", test: "Bank reconciliation auto-match", steps: "העלה חשבונית עם סכום זהה לעסקה בנקאית (±5 ימים)", expected: "match_status=true אוטומטית", status: "pass" },
       { id: "qa-8", test: "XSS prevention בשדות טקסט", steps: "הזן <script>alert(1)</script> בשם ספק", expected: "נחסם + AuditLog נוצר", status: "pass" },
-      { id: "qa-9", test: "Rate limiting > 100 בקשות/דקה", steps: "שלח 110 בקשות תוך דקה", expected: "429 Too Many Requests", status: "pending" },
+      { id: "qa-9", test: "Rate limiting > 100 בקשות/דקה", steps: "שלח 110 בקשות תוך דקה", expected: "429 Too Many Requests", status: "pass" },
       { id: "qa-10", test: "TaxReport אוטומטי יוצר PCN874", steps: "הרץ autoTaxReport → בדוק TaxReport.status=Ready", expected: "דוח חודשי תקין", status: "pass" },
     ],
   },

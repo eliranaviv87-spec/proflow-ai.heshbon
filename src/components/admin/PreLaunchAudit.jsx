@@ -5,7 +5,7 @@ const AUDIT_ITEMS = [
   // CRITICAL
   { id: "a1", severity: "critical", category: "אבטחה", title: "Stripe Webhook Signature Validation", status: "pass", desc: "constructEventAsync מוודא חתימה לפני כל עיבוד" },
   { id: "a2", severity: "critical", category: "אבטחה", title: "Admin-only endpoints מאומתים", status: "pass", desc: "כל פונקציות admin בודקות user.role === 'admin'" },
-  { id: "a3", severity: "critical", category: "אבטחה", title: "XSS Prevention — סינון קלט", status: "pass", desc: "validateRequest מסנן script tags ותוכן זדוני" },
+  { id: "a3", severity: "critical", category: "אבטחה", title: "XSS Prevention + SQLi blocking", status: "pass", desc: "validateRequest מסנן script tags, SQLi patterns + payload size cap" },
   { id: "a4", severity: "critical", category: "תשלומים", title: "Credit deduction לפני OCR", status: "pass", desc: "checkUserCredits נקרא לפני כל עיבוד AI" },
   { id: "a5", severity: "critical", category: "תשלומים", title: "Stripe duplicate prevention", status: "pass", desc: "stripeWebhook בודק קיום מנוי לפני יצירה חדשה" },
   { id: "a6", severity: "critical", category: "נתונים", title: "AuditLog לכל פעולה רגישה", status: "pass", desc: "OCR, תשלומים, שינויי admin — הכל מתועד" },
@@ -23,6 +23,8 @@ const AUDIT_ITEMS = [
   { id: "b10", severity: "minor", category: "ביצועים", title: "Parallel API calls", status: "pass", desc: "Promise.all() בשימוש במקום sequential calls" },
   { id: "b11", severity: "minor", category: "מוניטורינג", title: "Health check endpoint", status: "pass", desc: "/healthCheck מחזיר system status + response time" },
   { id: "b12", severity: "minor", category: "מוניטורינג", title: "Token usage notifications", status: "pass", desc: "התראה אוטומטית ב-<500 tokens" },
+  { id: "b15", severity: "minor", category: "אבטחה", title: "Rate limiting — כל endpoints", status: "pass", desc: "validateRequest (30/min), aiChat (10/min), payout (3/hr), checkout (5/10min)" },
+  { id: "b16", severity: "minor", category: "אבטחה", title: "CSP Headers + Permissions Policy", status: "pass", desc: "Content-Security-Policy מוגדר ב-index.html עם מדיניות מחמירה" },
   { id: "b13", severity: "minor", category: "תשלומים", title: "Auto-upgrade Discovery → Starter", status: "pass", desc: "autoUpgradeDiscovery automation פעיל" },
   { id: "b14", severity: "minor", category: "תמיכה", title: "Support chat + SLA 48h", status: "pass", desc: "SupportChatWidget עם escalation לטיקט" },
 ];
