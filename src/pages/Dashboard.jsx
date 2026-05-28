@@ -1,76 +1,42 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Clock, Sparkles, RefreshCw } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import AIAdviceModal from "../components/AIAdviceModal";
-import AiSmartSummary from "../components/AiSmartSummary";
-import TaxPredictorWidget from "../components/TaxPredictorWidget";
-import NextStepsWidget from "../components/NextStepsWidget";
+import { TrendingUp, TrendingDown, AlertTriangle, Sparkles } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
+import StatCard from "@/components/dashboard/StatCard";
+import TaxClockWidget from "@/components/dashboard/TaxClockWidget";
+import CashflowChart from "@/components/dashboard/CashflowChart";
+import ActivityFeed from "@/components/dashboard/ActivityFeed";
+import AIAdviceModal from "@/components/AIAdviceModal";
+import AiSmartSummary from "@/components/AiSmartSummary";
+import TaxPredictorWidget from "@/components/TaxPredictorWidget";
+import NextStepsWidget from "@/components/NextStepsWidget";
 
-const formatCurrency = (n) =>
-  new Intl.NumberFormat("he-IL", { style: "currency", currency: "ILS", maximumFractionDigits: 0 }).format(n || 0);
-
-const StatCard = ({ title, value, sub, color, glow, icon: Icon }) => (
-  <div className={`glass-card p-5 ${glow}`}>
-    <div className="flex items-start justify-between mb-3">
-      <p className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.45)" }}>{title}</p>
-      {Icon && <Icon size={16} style={{ color }} />}
-    </div>
-    <p className="text-2xl font-bold mb-1" style={{ color }}>{value}</p>
-    {sub && <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{sub}</p>}
-  </div>
-);
-
-const StatusBadge = ({ status }) => {
-  const map = {
-    Verified: { label: "מאומת", color: "#00E5FF" },
-    Archived: { label: "הותאם", color: "#4ade80" },
-    Pending_Review: { label: "ממתין", color: "#FFAB00" },
-    Processing: { label: "מעבד...", color: "#B388FF" },
-  };
-  const s = map[status] || { label: status, color: "#fff" };
-  return (
-    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${s.color}18`, color: s.color, border: `1px solid ${s.color}33` }}>
-      {s.label}
-    </span>
-  );
-};
-
-export default function Dashboard() {
+function useDashboardData() {
   const [docs, setDocs] = useState([]);
   const [txs, setTxs] = useState([]);
-  const [org, setOrg] = useState(null);
-  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [d, t, orgs] = await Promise.all([
-          base44.entities.Document.list("-created_date", 50),
-          base44.entities.BankTransaction.list("-date", 100),
-          base44.entities.Organization.list(),
-        ]);
-        setDocs(d);
-        setTxs(t);
-        if (orgs && orgs.length > 0) setOrg(orgs[0]);
-      } catch (err) {
-        console.error("Dashboard fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    Promise.all([
+      base44.entities.Document.list("-created_date", 50),
+      base44.entities.BankTransaction.list("-date", 100),
+    ]).then(([d, t]) => {
+      setDocs(d);
+      setTxs(t);
+    }).finally(() => setLoading(false));
 
-    // Real-time sync for Organization changes
-    const unsubscribe = base44.entities.Organization.subscribe((event) => {
-      if (event.type === "update" || event.type === "create") {
-        setOrg(event.data);
-      }
+    const unsub = base44.entities.Document.subscribe((event) => {
+      if (event.type === "create") setDocs(prev => [event.data, ...prev]);
+      else if (event.type === "update") setDocs(prev => prev.map(d => d.id === event.id ? event.data : d));
+      else if (event.type === "delete") setDocs(prev => prev.filter(d => d.id !== event.id));
     });
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
 
+  return { docs, txs, loading };
+}
+
+function computeFinancials(docs, txs) {
   const income = docs.filter(d => d.doc_type === "income");
   const expenses = docs.filter(d => d.doc_type === "expense");
   const totalIncome = income.reduce((s, d) => s + (d.total_amount || 0), 0);
@@ -79,128 +45,52 @@ export default function Dashboard() {
   const incomeTax = totalIncome * 0.15;
   const savings = expenses.reduce((s, d) => s + (d.vat_amount || 0), 0);
 
-  // 90-day cashflow prediction
-  const balance = txs.reduce((s, t) => s + (t.tx_type === "credit" ? t.amount : -t.amount || 0), 0);
-  const avgMonthly = txs.length > 0 ? (txs.reduce((s, t) => s + (t.amount || 0), 0) / Math.max(1, txs.length)) * 30 : 5000;
+  const balance = txs.reduce((s, t) => s + (t.tx_type === "credit" ? t.amount : -(t.amount || 0)), 0);
+  const avgMonthly = txs.length > 0
+    ? (txs.reduce((s, t) => s + (t.amount || 0), 0) / Math.max(1, txs.length)) * 30
+    : 5000;
   const cashflowData = Array.from({ length: 9 }, (_, i) => ({
     day: `יום ${(i + 1) * 10}`,
     balance: Math.max(0, balance + avgMonthly * (i - 3) + Math.random() * 2000 - 1000),
   }));
 
+  return { income, expenses, totalIncome, totalExpenses, vatOwed, incomeTax, savings, cashflowData };
+}
+
+export default function Dashboard() {
+  const { docs, txs, loading } = useDashboardData();
+  const [showModal, setShowModal] = useState(false);
+  const { income, expenses, totalIncome, totalExpenses, vatOwed, incomeTax, savings, cashflowData } = computeFinancials(docs, txs);
+
   return (
     <div className="space-y-4 md:space-y-6">
-      {/* Welcome */}
       <div>
         <h1 className="text-xl md:text-2xl font-bold text-white mb-1">המיליונים שלך עובדים בשבילך. הנה תמונת המצב.</h1>
         <p className="text-xs md:text-sm" style={{ color: "rgba(255,255,255,0.4)" }}>עדכון אחרון: {new Date().toLocaleDateString("he-IL")}</p>
       </div>
 
-      {/* Next Steps Widget */}
       <NextStepsWidget docs={docs} />
-
-      {/* AI Smart Summary */}
       <AiSmartSummary totalIncome={totalIncome} totalExpenses={totalExpenses} vatOwed={vatOwed} docsCount={docs.length} />
 
-      {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <StatCard title="הכנסות" value={formatCurrency(totalIncome)} sub={`${income.length} מסמכים`} color="#00E5FF" glow="neon-glow-cyan" icon={TrendingUp} />
+        <StatCard title="הכנסות" value={formatCurrency(totalIncome)} sub={`${income.length} מסמכים`} color="#00E5FF" glow="cyan" icon={TrendingUp} />
         <StatCard title="הוצאות" value={formatCurrency(totalExpenses)} sub={`${expenses.length} מסמכים`} color="#ff6b6b" icon={TrendingDown} />
-        <StatCard title='מע"מ לתשלום' value={formatCurrency(vatOwed)} sub="חבות מס בזמן אמת" color="#FFAB00" glow="neon-glow-amber" icon={AlertTriangle} />
-        <StatCard title='חסכון מע"מ' value={formatCurrency(savings)} sub="ניכוי מס תשומות" color="#B388FF" glow="neon-glow-purple" icon={Sparkles} />
+        <StatCard title='מע"מ לתשלום' value={formatCurrency(vatOwed)} sub="חבות מס בזמן אמת" color="#FFAB00" glow="amber" icon={AlertTriangle} />
+        <StatCard title='חסכון מע"מ' value={formatCurrency(savings)} sub="ניכוי מס תשומות" color="#B388FF" glow="purple" icon={Sparkles} />
       </div>
 
-      {/* Tax Predictor AI Widget */}
-      <TaxPredictorWidget
-        totalIncome={totalIncome}
-        totalExpenses={totalExpenses}
-        vatOwed={vatOwed}
-        incomeTax={incomeTax}
-      />
+      <TaxPredictorWidget totalIncome={totalIncome} totalExpenses={totalExpenses} vatOwed={vatOwed} incomeTax={incomeTax} />
 
-      {/* Tax Widget + Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Tax Clock */}
-        <div className="glass-card p-6 neon-glow-amber lg:col-span-1">
-          <p className="text-xs font-semibold mb-4" style={{ color: "#FFAB00" }}>חבות מס בזמן אמת (אל תנחש, תדע)</p>
-          <div className="space-y-4 mb-5">
-            <div>
-              <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>מע"מ לתשלום</p>
-              <p className="text-3xl font-black" style={{ color: "#FFAB00" }}>{formatCurrency(vatOwed)}</p>
-            </div>
-            <div>
-              <p className="text-xs mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>מקדמת מס הכנסה</p>
-              <p className="text-2xl font-bold" style={{ color: "#ff6b6b" }}>{formatCurrency(incomeTax)}</p>
-            </div>
-          </div>
-          <button onClick={() => setShowModal(true)} className="w-full btn-amber rounded-xl py-2.5 text-sm font-semibold">
-            ⚡ אופטימיזציית מס עכשיו
-          </button>
-        </div>
-
-        {/* Cashflow Chart */}
-        <div className="glass-card p-6 lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-xs font-semibold" style={{ color: "#00E5FF" }}>תחזית תזרים 90 יום</p>
-            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "rgba(0,229,255,0.1)", color: "#00E5FF", border: "1px solid rgba(0,229,255,0.2)" }}>AI Predictive</span>
-          </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <LineChart data={cashflowData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-              <XAxis dataKey="day" tick={{ fontSize: 10, fill: "rgba(255,255,255,0.35)" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "rgba(255,255,255,0.35)" }} axisLine={false} tickLine={false} tickFormatter={(v) => `₪${(v / 1000).toFixed(0)}K`} />
-              <Tooltip contentStyle={{ background: "#111114", border: "1px solid rgba(0,229,255,0.2)", borderRadius: "10px", color: "#fff", fontSize: "12px" }} formatter={(v) => [formatCurrency(v), "יתרה"]} />
-              <Line type="monotone" dataKey="balance" stroke="#00E5FF" strokeWidth={2} dot={false} style={{ filter: "drop-shadow(0 0 6px #00E5FF)" }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        <TaxClockWidget vatOwed={vatOwed} incomeTax={incomeTax} onOptimize={() => setShowModal(true)} />
+        <CashflowChart data={cashflowData} />
       </div>
 
-      {/* Activity Feed */}
-      <div className="glass-card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-sm font-semibold text-white">פיד פעילות — מסמכים אחרונים</p>
-          <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{docs.length} מסמכים סה"כ</span>
-        </div>
-        {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(0,229,255,0.2)", borderTopColor: "#00E5FF" }} />
-          </div>
-        ) : docs.length === 0 ? (
-          <div style={{ border: "2px dashed rgba(0,229,255,0.35)", borderRadius: 20, padding: "48px 24px", textAlign: "center", background: "rgba(0,229,255,0.03)", boxShadow: "0 0 40px rgba(0,229,255,0.07)" }}>
-            <div style={{ width: 72, height: 72, borderRadius: 20, background: "rgba(0,229,255,0.1)", border: "1px solid rgba(0,229,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", boxShadow: "0 0 30px rgba(0,229,255,0.15)" }}>
-              <TrendingUp size={32} style={{ color: "#00E5FF" }} />
-            </div>
-            <p className="text-lg font-bold text-white mb-2">גרור את החשבונית הראשונה שלך לכאן כדי להתחיל</p>
-            <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>AI יחלץ את כל הנתונים אוטומטית תוך שניות</p>
-            <a href="/vault" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg, #D4AF37, #00E5FF)", color: "#0A0A0A", padding: "14px 32px", borderRadius: 14, fontWeight: 900, fontSize: 15, textDecoration: "none" }}>
-              ⬆️ העלה חשבונית ראשונה
-            </a>
-          </div>
-        ) : (
+      <ActivityFeed docs={docs} loading={loading} />
 
-          <div className="space-y-2">
-            {docs.slice(0, 8).map((doc) => (
-              <div key={doc.id} className="flex items-center justify-between p-3 rounded-xl transition-colors" style={{ background: "rgba(255,255,255,0.02)" }}>
-                <div className="flex items-center gap-3">
-                  {doc.status === "Archived" ? <CheckCircle size={14} style={{ color: "#4ade80" }} /> : <Clock size={14} style={{ color: "#FFAB00" }} />}
-                  <div>
-                    <p className="text-sm font-medium text-white">{doc.supplier_name || "ספק לא ידוע"}</p>
-                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{doc.date_issued || doc.created_date?.split("T")[0]}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <p className="text-sm font-semibold" style={{ color: doc.doc_type === "income" ? "#00E5FF" : "#ff6b6b" }}>
-                    {doc.doc_type === "income" ? "+" : "-"}{formatCurrency(doc.total_amount)}
-                  </p>
-                  <StatusBadge status={doc.status} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {showModal && <AIAdviceModal vatOwed={vatOwed} incomeTax={incomeTax} totalIncome={totalIncome} onClose={() => setShowModal(false)} />}
+      {showModal && (
+        <AIAdviceModal vatOwed={vatOwed} incomeTax={incomeTax} totalIncome={totalIncome} onClose={() => setShowModal(false)} />
+      )}
     </div>
   );
 }

@@ -1,66 +1,55 @@
-import { FileText, CheckCircle2, Clock, AlertCircle } from "lucide-react";
-import { motion } from "framer-motion";
-import moment from "moment";
+import { TrendingUp, CheckCircle, Clock } from "lucide-react";
+import { formatCurrency } from "@/lib/format";
+import StatusBadge from "@/components/ui/StatusBadge";
+import Spinner from "@/components/ui/Spinner";
+import GlassCard from "@/components/ui/GlassCard";
 
-const statusConfig = {
-  Verified: { icon: CheckCircle2, color: "text-neon-cyan", bg: "bg-neon-cyan/10", label: "מאומת" },
-  Pending_Review: { icon: Clock, color: "text-neon-amber", bg: "bg-neon-amber/10", label: "ממתין" },
-  Processing: { icon: AlertCircle, color: "text-neon-purple", bg: "bg-neon-purple/10", label: "מעבד" },
-  Archived: { icon: CheckCircle2, color: "text-muted-foreground", bg: "bg-muted/50", label: "בארכיון" },
-};
-
-export default function ActivityFeed({ documents = [] }) {
-  const recentDocs = documents.slice(0, 8);
-
+export default function ActivityFeed({ docs, loading }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="glass-card p-6 col-span-2 lg:col-span-1"
-    >
-      <h3 className="text-sm font-medium text-foreground mb-4">פעילות אחרונה</h3>
+    <GlassCard className="p-6">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-sm font-semibold text-white">פיד פעילות — מסמכים אחרונים</p>
+        <span className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{docs.length} מסמכים סה"כ</span>
+      </div>
 
-      {recentDocs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-10 text-center">
-          <FileText className="w-10 h-10 text-muted-foreground/30 mb-3" />
-          <p className="text-sm text-muted-foreground">
-            הכספת ריקה. זרוק לכאן חשבונית
-          </p>
-          <p className="text-xs text-muted-foreground/60 mt-1">
-            והבינה המלאכותית שלנו תעשה את הקסם
-          </p>
+      {loading ? (
+        <div className="flex items-center justify-center py-8">
+          <Spinner />
+        </div>
+      ) : docs.length === 0 ? (
+        <div style={{ border: "2px dashed rgba(0,229,255,0.35)", borderRadius: 20, padding: "48px 24px", textAlign: "center", background: "rgba(0,229,255,0.03)", boxShadow: "0 0 40px rgba(0,229,255,0.07)" }}>
+          <div style={{ width: 72, height: 72, borderRadius: 20, background: "rgba(0,229,255,0.1)", border: "1px solid rgba(0,229,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", boxShadow: "0 0 30px rgba(0,229,255,0.15)" }}>
+            <TrendingUp size={32} style={{ color: "#00E5FF" }} />
+          </div>
+          <p className="text-lg font-bold text-white mb-2">גרור את החשבונית הראשונה שלך לכאן כדי להתחיל</p>
+          <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.4)" }}>AI יחלץ את כל הנתונים אוטומטית תוך שניות</p>
+          <a href="/vault" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg, #D4AF37, #00E5FF)", color: "#0A0A0A", padding: "14px 32px", borderRadius: 14, fontWeight: 900, fontSize: 15, textDecoration: "none" }}>
+            ⬆️ העלה חשבונית ראשונה
+          </a>
         </div>
       ) : (
-        <div className="space-y-2 max-h-[340px] overflow-y-auto">
-          {recentDocs.map((doc, i) => {
-            const config = statusConfig[doc.status] || statusConfig.Processing;
-            const Icon = config.icon;
-            return (
-              <div key={doc.id || i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-secondary/30 transition-colors">
-                <div className={`w-8 h-8 rounded-lg ${config.bg} flex items-center justify-center flex-shrink-0`}>
-                  <Icon className={`w-4 h-4 ${config.color}`} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-foreground truncate">{doc.supplier_name || "מסמך חדש"}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {doc.doc_number ? `#${doc.doc_number}` : ""} 
-                    {doc.total_amount ? ` • ₪${doc.total_amount.toLocaleString("he-IL")}` : ""}
-                  </p>
-                </div>
-                <div className="text-left flex-shrink-0">
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${config.bg} ${config.color} font-medium`}>
-                    {config.label}
-                  </span>
-                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">
-                    {doc.created_date ? moment(doc.created_date).fromNow() : ""}
-                  </p>
+        <div className="space-y-2">
+          {docs.slice(0, 8).map((doc) => (
+            <div key={doc.id} className="flex items-center justify-between p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.02)" }}>
+              <div className="flex items-center gap-3">
+                {doc.status === "Archived"
+                  ? <CheckCircle size={14} style={{ color: "#4ade80" }} />
+                  : <Clock size={14} style={{ color: "#FFAB00" }} />}
+                <div>
+                  <p className="text-sm font-medium text-white">{doc.supplier_name || "ספק לא ידוע"}</p>
+                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>{doc.date_issued || doc.created_date?.split("T")[0]}</p>
                 </div>
               </div>
-            );
-          })}
+              <div className="flex items-center gap-3">
+                <p className="text-sm font-semibold" style={{ color: doc.doc_type === "income" ? "#00E5FF" : "#ff6b6b" }}>
+                  {doc.doc_type === "income" ? "+" : "-"}{formatCurrency(doc.total_amount)}
+                </p>
+                <StatusBadge status={doc.status} />
+              </div>
+            </div>
+          ))}
         </div>
       )}
-    </motion.div>
+    </GlassCard>
   );
 }
