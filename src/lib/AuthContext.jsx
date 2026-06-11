@@ -23,10 +23,12 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       setIsAuthenticated(false);
       setUser(null);
-      if (error?.message?.includes('not_registered') || error?.status === 403) {
+      // Only set error for registered-but-blocked users, not for simply unauthenticated
+      if (error?.message?.includes('not_registered') || error?.message?.includes('User not registered')) {
         setAuthError({ type: 'user_not_registered', message: error.message });
       } else {
-        setAuthError({ type: 'auth_required', message: 'Authentication required' });
+        // Not logged in - silent, no error. Public pages will work fine.
+        setAuthError(null);
       }
     } finally {
       setIsLoadingAuth(false);

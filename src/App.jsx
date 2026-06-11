@@ -36,7 +36,7 @@ import Signup from './pages/Signup';
 
 // LayoutGuard - protects authenticated routes
 const LayoutGuard = () => {
-  const { isAuthenticated, isLoadingAuth } = useAuth();
+  const { isAuthenticated, isLoadingAuth, authError } = useAuth();
 
   if (isLoadingAuth) {
     return (
@@ -44,6 +44,10 @@ const LayoutGuard = () => {
         <div className="w-8 h-8 border-2 rounded-full animate-spin" style={{ borderColor: "rgba(0,229,255,0.2)", borderTopColor: "#00E5FF" }}></div>
       </div>
     );
+  }
+
+  if (authError?.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
   }
 
   if (!isAuthenticated) {
@@ -55,15 +59,11 @@ const LayoutGuard = () => {
 
 // Inner app - wrapped inside AuthProvider + Router
 const AppRoutes = () => {
-  const { authError } = useAuth();
-
-  if (authError?.type === 'user_not_registered') {
-    return <UserNotRegisteredError />;
-  }
+  const { authError, isLoadingAuth } = useAuth();
 
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public routes - always accessible */}
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />

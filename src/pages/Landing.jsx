@@ -50,13 +50,18 @@ function LiveCounter() {
 export default function Landing() {
   useEffect(() => {
     const check = async () => {
-      const authed = await base44.auth.isAuthenticated();
-      if (!authed) return;
-      const user = await base44.auth.me();
-      const isAdmin = user?.role === "admin" || user?.data?.role === "admin";
-      if (isAdmin) return;
-      const subs = await base44.entities.Subscription.filter({ user_email: user.email, status: "active" });
-      if (subs && subs.length > 0) window.location.href = "/dashboard";
+      try {
+        const authed = await base44.auth.isAuthenticated();
+        if (!authed) return;
+        const user = await base44.auth.me();
+        if (!user) return;
+        const isAdmin = user?.role === "admin";
+        if (isAdmin) return;
+        const subs = await base44.entities.Subscription.filter({ user_email: user.email, status: "active" });
+        if (subs && subs.length > 0) window.location.href = "/dashboard";
+      } catch {
+        // Silent - stay on landing page
+      }
     };
     check();
   }, []);
